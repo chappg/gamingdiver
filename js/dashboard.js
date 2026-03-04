@@ -25,8 +25,9 @@ function winClass(wr) {
 }
 
 class Dashboard {
-  constructor(results) {
+  constructor(results, snapshots) {
     this.r = results;
+    this.snapshots = snapshots || [];
     this.charts = {};
     this.shipSortCol = 'battles';
     this.shipSortDir = 'desc';
@@ -500,9 +501,162 @@ class Dashboard {
 
   // ---- TRENDS TAB ----
   renderTrends() {
+    this.renderSnapshotTrends();
     this.renderMonthlyChart();
     this.renderHeatmap();
     this.renderSessionDuration();
+  }
+
+  renderSnapshotTrends() {
+    const container = document.getElementById('snapshotTrends');
+    const snaps = this.snapshots;
+
+    if (snaps.length < 2) {
+      const count = snaps.length;
+      container.innerHTML = `
+        <div class="snapshot-notice">
+          <h3>📈 Performance Trends</h3>
+          <p>${count === 0 ? 'Upload your data export to create your first snapshot.' :
+            'You have 1 snapshot so far. Upload again after playing more battles to start tracking trends!'}</p>
+          <p class="hint">Each time you upload a new data export, GamingDiver saves a snapshot. The deltas between snapshots show how your stats are trending over time.</p>
+        </div>`;
+      return;
+    }
+
+    // Compute deltas between consecutive snapshots
+    const periods = [];
+    for (let i = 1; i < snaps.length; i++) {
+      const prev = snaps[i - 1];
+      const curr = snaps[i];
+      const mode = String(DEFAULT_MODE); // Standard
+
+      const pm = prev.modeStats[mode] || prev.modeStats['all'];
+      const cm = curr.modeStats[mode] || curr.modeStats['all'];
+      if (!pm || !cm) continue;
+
+      const dBattles = cm.battles - pm.battles;
+      if (dBattles <= 0) continue; // no new battles
+
+      const dWins = cm.wins - pm.wins;
+      const dFrags = cm.frags - pm.frags;
+      const dDeaths = (cm.battles - cm.survived) - (pm.battles - pm.survived);
+      const dDamage = cm.damage - pm.damage;
+
+      periods.push({
+        from: new Date(prev.timestamp),
+        to: new Date(curr.timestamp),
+        battles: dBattles,
+        winRate: dBattles > 0 ? (dWins / dBattles * 100) : 0,
+        kd: dDeaths > 0 ? (dFrags / dDeaths) : dFrags,
+        avgDamage: dBattles > 0 ? Math.round(dDamage / dBattles) : 0,
+        avgFrags: dBattles > 0 ? (dFrags / dBattles) : 0,
+      });
+    }
+
+    if (periods.length === 0) {
+      container.innerHTML = `
+        <div class="snapshot-notice">
+          <h3>📈 Performance Trends</h3>
+          <p>No new battles detected between snapshots. Play some games and upload a fresh export!</p>
+        </div>`;
+      return;
+    }
+
+    // Format date as "Mar 4"
+    const fmtDate = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
+    const labels = periods.map((p, i) => i === 0 ? fmtDate(p.from) + ' → ' + fmtDate(p.to) : fmtDate(p.to));
+
+    // Trend arrow
+    const trend = (vals) => {
+      if (vals.length < 2) return '';
+      const last = vals[vals.length - 1], prev = vals[vals.length - 2];
+      if (last > prev) return ' <span class="trend-up">▲</span>';
+      if (last < prev) return ' <span class="trend-down">▼</span>';
+      return ' <span class="trend-flat">▸</span>';
+    };
+
+    const wrVals = periods.map(p => p.winRate);
+    const kdVals = periods.map(p => p.kd);
+    const dmgVals = periods.map(p => p.avgDamage);
+
+    // Latest period summary
+    const latest = periods[periods.length - 1];
+    const prevP = periods.length >= 2 ? periods[periods.length - 2] : null;
+
+    const delta = (curr, prev, fmt, suffix = '') => {
+      if (!prev) return '';
+      const d = curr - prev;
+      const cls = d > 0 ? 'trend-up' : d < 0 ? 'trend-down' : 'trend-flat';
+      const sign = d > 0 ? '+' : '';
+      return `<span class="${cls}">${sign}${fmt(d)}${suffix}</span>`;
+    };
+
+    container.innerHTML = `
+      <div class="snapshot-summary">
+        <h3>📈 Performance Trends <span class="snapshot-count">(${snaps.length} snapshots)</span></h3>
+        <div class="snapshot-latest">
+          <div class="snapshot-period">Latest: ${fmtDate(latest.from)} → ${fmtDate(latest.to)} · ${latest.battles} battles</div>
+          <div class="stat-cards">
+            ${this.statCard(pct(latest.winRate), 'Win Rate' + trend(wrVals),
+              prevP ? delta(latest.winRate, prevP.winRate, n => n.toFixed(1), '%') : '')}
+            ${this.statCard(latest.kd.toFixed(2), 'K/D Ratio' + trend(kdVals),
+              prevP ? delta(latest.kd, prevP.kd, n => n.toFixed(2)) : '')}
+            ${this.statCard(fmt(latest.avgDamage), 'Avg Damage' + trend(dmgVals),
+              prevP ? delta(latest.avgDamage, prevP.avgDamage, n => fmt(Math.round(n))) : '')}
+            ${this.statCard(latest.avgFrags.toFixed(2), 'Avg Kills', '')}
+          </div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <h3>Win Rate Over Time</h3>
+          <canvas id="chartTrendWR"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>K/D Ratio Over Time</h3>
+          <canvas id="chartTrendKD"></canvas>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <h3>Avg Damage Over Time</h3>
+          <canvas id="chartTrendDmg"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Battles Per Period</h3>
+          <canvas id="chartTrendBattles"></canvas>
+        </div>
+      </div>`;
+
+    // Render charts
+    const chartOpts = (label, color, data, yFmt) => ({
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label, data,
+          borderColor: color, backgroundColor: color + '30',
+          fill: true, tension: 0.3, pointRadius: 5, pointHoverRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { maxRotation: 45 } },
+          y: { ...(yFmt || {}) }
+        }
+      }
+    });
+
+    this.charts.trendWR = new Chart(document.getElementById('chartTrendWR'),
+      chartOpts('Win Rate %', CHART_COLORS.green, wrVals, { min: Math.max(0, Math.min(...wrVals) - 5), max: Math.min(100, Math.max(...wrVals) + 5) }));
+    this.charts.trendKD = new Chart(document.getElementById('chartTrendKD'),
+      chartOpts('K/D', CHART_COLORS.accent, kdVals, { min: Math.max(0, Math.min(...kdVals) - 0.3) }));
+    this.charts.trendDmg = new Chart(document.getElementById('chartTrendDmg'),
+      chartOpts('Avg Damage', CHART_COLORS.orange, dmgVals, { beginAtZero: false }));
+    this.charts.trendBattles = new Chart(document.getElementById('chartTrendBattles'),
+      chartOpts('Battles', CHART_COLORS.purple, periods.map(p => p.battles), { beginAtZero: true }));
   }
 
   renderMonthlyChart() {

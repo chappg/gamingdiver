@@ -1,14 +1,21 @@
 // GamingDiver — Main application controller
 
 const DB_NAME = 'gamingdiver-cache';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'results';
+const SNAPSHOT_STORE = 'snapshots';
 
 // IndexedDB helpers
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME);
+    req.onupgradeneeded = (e) => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE_NAME))
+        db.createObjectStore(STORE_NAME);
+      if (!db.objectStoreNames.contains(SNAPSHOT_STORE))
+        db.createObjectStore(SNAPSHOT_STORE, { keyPath: 'id', autoIncrement: true });
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
@@ -30,11 +37,59 @@ async function getCachedResults() {
   } catch { return null; }
 }
 
+// Snapshot persistence — stores cumulative stats at each upload
+async function saveSnapshot(results) {
+  const db = await openDB();
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    totalBattles: results.career.totalBattles,
+    // Store per-mode cumulative stats
+    modeStats: {},
+    // Store per-ship cumulative stats for ship-level trends
+    shipStats: {},
+  };
+
+  // Career mode stats
+  for (const [mode, ms] of Object.entries(results.career.modeStats)) {
+    snapshot.modeStats[mode] = {
+      battles: ms.battles, wins: ms.wins, losses: ms.losses,
+      damage: ms.damage, frags: ms.frags, survived: ms.survived,
+    };
+  }
+
+  // Per-ship stats (keyed by name|nation|class for deduped identity)
+  for (const s of results.ships) {
+    const key = s.name + '|' + s.nation + '|' + s.class;
+    snapshot.shipStats[key] = {
+      name: s.name, nation: s.nation, class: s.class, tier: s.tier, premium: s.premium,
+      battles: s.battles, wins: s.wins, damage: s.damage,
+      frags: s.frags, survived: s.survived,
+    };
+  }
+
+  const tx = db.transaction(SNAPSHOT_STORE, 'readwrite');
+  tx.objectStore(SNAPSHOT_STORE).add(snapshot);
+  return new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject; });
+}
+
+async function getSnapshots() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(SNAPSHOT_STORE, 'readonly');
+    const req = tx.objectStore(SNAPSHOT_STORE).getAll();
+    return new Promise((resolve) => {
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+  } catch { return []; }
+}
+
 async function clearCache() {
   try {
     const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const tx = db.transaction([STORE_NAME, SNAPSHOT_STORE], 'readwrite');
     tx.objectStore(STORE_NAME).clear();
+    tx.objectStore(SNAPSHOT_STORE).clear();
     return new Promise((resolve) => { tx.oncomplete = resolve; tx.onerror = resolve; });
   } catch {}
 }
@@ -130,6 +185,8 @@ class App {
       this.updateProgress(50, 'Analyzing data...');
       const results = this.analyzer.analyze();
 
+      this.updateProgress(70, 'Saving snapshot...');
+      await saveSnapshot(results);
       this.updateProgress(80, 'Caching results...');
       await cacheResults(results);
 
@@ -159,7 +216,7 @@ class App {
     document.getElementById('progressFill').style.width = '0%';
   }
 
-  showDashboard(results) {
+  async showDashboard(results) {
     document.getElementById('landing').hidden = true;
     document.getElementById('dashboard').hidden = false;
     this.hideProgress();
@@ -169,7 +226,8 @@ class App {
       Object.values(this.dashboard.charts).forEach(c => c.destroy?.());
     }
 
-    this.dashboard = new Dashboard(results);
+    const snapshots = await getSnapshots();
+    this.dashboard = new Dashboard(results, snapshots);
     this.dashboard.render();
   }
 

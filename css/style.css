@@ -358,3 +358,19 @@ footer a { color: var(--accent-dim); }
   .dash-header { flex-direction: column; align-items: flex-start; }
   .filters { flex-direction: column; }
 }
+
+/* Snapshot Trends */
+.snapshot-notice {
+  background: var(--bg-card); border-radius: 12px; padding: 24px; margin-bottom: 20px;
+  border: 1px dashed var(--border);
+}
+.snapshot-notice h3 { margin: 0 0 8px; color: var(--text-bright); }
+.snapshot-notice .hint { color: var(--text-dim); font-size: 0.85em; margin-top: 12px; }
+.snapshot-summary { margin-bottom: 20px; }
+.snapshot-summary h3 { margin: 0 0 12px; color: var(--text-bright); }
+.snapshot-count { color: var(--text-dim); font-size: 0.8em; font-weight: normal; }
+.snapshot-latest { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); }
+.snapshot-period { color: var(--text-dim); font-size: 0.9em; margin-bottom: 12px; }
+.trend-up { color: #4caf50; font-size: 0.85em; }
+.trend-down { color: #ef5350; font-size: 0.85em; }
+.trend-flat { color: var(--text-dim); font-size: 0.85em; }
