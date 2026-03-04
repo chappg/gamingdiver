@@ -158,7 +158,7 @@ class App {
   async checkCache() {
     const cached = await getCachedResults();
     if (cached) {
-      this.showDashboard(cached);
+      await this.showDashboard(cached);
     }
   }
 
@@ -221,9 +221,13 @@ class App {
     document.getElementById('dashboard').classList.remove('hidden');
     this.hideProgress();
 
-    // Clean up old charts
+    // Clean up old charts (both from dashboard object and any orphaned Chart.js instances)
     if (this.dashboard) {
       Object.values(this.dashboard.charts).forEach(c => c.destroy?.());
+    }
+    // Destroy all existing Chart.js instances to prevent "canvas in use" errors
+    if (typeof Chart !== 'undefined') {
+      Object.values(Chart.instances || {}).forEach(c => { try { c.destroy(); } catch(e) {} });
     }
 
     const snapshots = await getSnapshots();
