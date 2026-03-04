@@ -75,6 +75,7 @@
 
     <!-- Career Overview Tab -->
     <div class="tab-content active" id="tab-overview">
+      <div class="mode-tabs" id="overviewModeTabs"></div>
       <div class="stat-cards" id="overviewCards"></div>
       <div class="chart-row">
         <div class="chart-box wide">
@@ -107,6 +108,7 @@
 
     <!-- Ship Performance Tab -->
     <div class="tab-content" id="tab-ships">
+      <div class="mode-tabs" id="shipModeTabs"></div>
       <div class="filters">
         <select id="filterNation"><option value="">All Nations</option></select>
         <select id="filterClass"><option value="">All Classes</option></select>
@@ -114,7 +116,7 @@
         <label class="min-battles-label">
           Min battles: <input type="number" id="filterMinBattles" value="10" min="1" max="500">
         </label>
-        <select id="filterMode"><option value="">All Modes</option></select>
+        <span id="shipCount" style="color:var(--text-dim);font-size:0.9em"></span>
       </div>
       <div class="table-container">
         <table id="shipTable" class="data-table">
@@ -123,7 +125,6 @@
               <th data-sort="name">Ship</th>
               <th data-sort="nation">Nation</th>
               <th data-sort="class">Class</th>
-              <th data-sort="tier">Tier</th>
               <th data-sort="battles" class="num">Battles</th>
               <th data-sort="winRate" class="num">Win %</th>
               <th data-sort="avgDamage" class="num">Avg Dmg</th>

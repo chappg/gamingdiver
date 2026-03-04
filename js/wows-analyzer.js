@@ -82,36 +82,62 @@ class WoWSAnalyzer {
     const sessions = this.data['WOWSL_Game_Sessions'] || [];
     const info = (this.data['Account_Info'] || [])[0] || {};
 
-    // Battle stats by mode
+    // Build per-mode stats
     const modeStats = {};
-    let totalBattles = 0, totalWins = 0, totalFrags = 0, totalDamage = 0, totalSurvived = 0;
-    let totalShotsMain = 0, totalHitsMain = 0, totalShotsTorp = 0, totalHitsTorp = 0;
 
     for (const row of bt) {
       const type = parseInt(row.TYPE);
-      if (BATTLE_TYPES[type]?.aggregate) continue; // skip aggregate rows
+      if (BATTLE_TYPES[type]?.aggregate) continue;
       const battles = parseInt(row.BATTLES_COUNT) || 0;
       if (battles === 0) continue;
+      const wins = parseInt(row.WINS) || 0;
+      const frags = parseInt(row.FRAGS) || 0;
+      const damage = parseInt(row.DAMAGE_DEALT) || 0;
+      const survived = parseInt(row.SURVIVED) || 0;
+      const shotsMain = parseInt(row.SHOTS_BY_MAIN) || 0;
+      const hitsMain = parseInt(row.HITS_BY_MAIN) || 0;
+      const shotsTorp = parseInt(row.SHOTS_BY_TPD) || 0;
+      const hitsTorp = parseInt(row.HITS_BY_TPD) || 0;
+      const deaths = battles - survived;
+
       modeStats[type] = {
         name: BATTLE_TYPES[type]?.name || `Type ${type}`,
-        battles,
-        wins: parseInt(row.WINS) || 0,
-        losses: parseInt(row.LOSSES) || 0,
-        survived: parseInt(row.SURVIVED) || 0,
-        frags: parseInt(row.FRAGS) || 0,
-        damage: parseInt(row.DAMAGE_DEALT) || 0,
+        battles, wins, losses: parseInt(row.LOSSES) || 0, survived, frags, damage,
         planesKilled: parseInt(row.PLANES_KILLED) || 0,
+        shotsMain, hitsMain, shotsTorp, hitsTorp,
+        // Derived
+        winRate: battles > 0 ? (wins / battles * 100) : 0,
+        avgDamage: battles > 0 ? Math.round(damage / battles) : 0,
+        kd: deaths > 0 ? (frags / deaths) : frags,
+        survivalRate: battles > 0 ? (survived / battles * 100) : 0,
+        mainAccuracy: shotsMain > 0 ? (hitsMain / shotsMain * 100) : 0,
+        torpAccuracy: shotsTorp > 0 ? (hitsTorp / shotsTorp * 100) : 0,
       };
-      totalBattles += battles;
-      totalWins += parseInt(row.WINS) || 0;
-      totalFrags += parseInt(row.FRAGS) || 0;
-      totalDamage += parseInt(row.DAMAGE_DEALT) || 0;
-      totalSurvived += parseInt(row.SURVIVED) || 0;
-      totalShotsMain += parseInt(row.SHOTS_BY_MAIN) || 0;
-      totalHitsMain += parseInt(row.HITS_BY_MAIN) || 0;
-      totalShotsTorp += parseInt(row.SHOTS_BY_TPD) || 0;
-      totalHitsTorp += parseInt(row.HITS_BY_TPD) || 0;
     }
+
+    // Compute "all modes" totals
+    let totalBattles = 0, totalWins = 0, totalFrags = 0, totalDamage = 0, totalSurvived = 0;
+    let totalShotsMain = 0, totalHitsMain = 0, totalShotsTorp = 0, totalHitsTorp = 0;
+    for (const ms of Object.values(modeStats)) {
+      totalBattles += ms.battles; totalWins += ms.wins; totalFrags += ms.frags;
+      totalDamage += ms.damage; totalSurvived += ms.survived;
+      totalShotsMain += ms.shotsMain; totalHitsMain += ms.hitsMain;
+      totalShotsTorp += ms.shotsTorp; totalHitsTorp += ms.hitsTorp;
+    }
+    const allDeaths = totalBattles - totalSurvived;
+
+    // Store "all" as a synthetic mode entry
+    modeStats['all'] = {
+      name: 'All Modes', battles: totalBattles, wins: totalWins, frags: totalFrags,
+      damage: totalDamage, survived: totalSurvived,
+      shotsMain: totalShotsMain, hitsMain: totalHitsMain, shotsTorp: totalShotsTorp, hitsTorp: totalHitsTorp,
+      winRate: totalBattles > 0 ? (totalWins / totalBattles * 100) : 0,
+      avgDamage: totalBattles > 0 ? Math.round(totalDamage / totalBattles) : 0,
+      kd: allDeaths > 0 ? (totalFrags / allDeaths) : totalFrags,
+      survivalRate: totalBattles > 0 ? (totalSurvived / totalBattles * 100) : 0,
+      mainAccuracy: totalShotsMain > 0 ? (totalHitsMain / totalShotsMain * 100) : 0,
+      torpAccuracy: totalShotsTorp > 0 ? (totalHitsTorp / totalShotsTorp * 100) : 0,
+    };
 
     // Session stats
     let totalPlayTimeMin = 0;
@@ -124,25 +150,12 @@ class WoWSAnalyzer {
       totalPlayTimeMin += (end - start) / 60000;
     }
 
-    const deaths = totalBattles - totalSurvived;
-
     return {
       gamertag: info.GAMERTAG || acct.NAME || 'Commander',
-      totalBattles,
-      totalWins,
-      winRate: totalBattles > 0 ? (totalWins / totalBattles * 100) : 0,
-      totalFrags,
-      kd: deaths > 0 ? (totalFrags / deaths) : totalFrags,
-      totalDamage,
-      avgDamage: totalBattles > 0 ? Math.round(totalDamage / totalBattles) : 0,
-      survivalRate: totalBattles > 0 ? (totalSurvived / totalBattles * 100) : 0,
-      mainAccuracy: totalShotsMain > 0 ? (totalHitsMain / totalShotsMain * 100) : 0,
-      torpAccuracy: totalShotsTorp > 0 ? (totalHitsTorp / totalShotsTorp * 100) : 0,
       totalPlayTimeHours: Math.round(totalPlayTimeMin / 60),
       totalSessions: sessions.length,
       avgSessionMin: sessions.length > 0 ? Math.round(totalPlayTimeMin / sessions.length) : 0,
-      firstSession,
-      lastSession,
+      firstSession, lastSession,
       modeStats,
     };
   }
@@ -310,7 +323,8 @@ class WoWSAnalyzer {
 
   analyzeRecords() {
     const shipByType = this.data['WOWSL_Ship_Statistics_By_Type'] || [];
-    const records = {};
+    // Records per battle type + 'all'
+    const byMode = {};
 
     for (const row of shipByType) {
       const type = parseInt(row.TYPE);
@@ -324,20 +338,25 @@ class WoWSAnalyzer {
       const maxExp = parseInt(row.MAX_EXP) || 0;
       const maxPlanes = parseInt(row.MAX_PLANES_KILLED) || 0;
 
-      if (maxDmg > 0 && (!records.maxDamage || maxDmg > records.maxDamage.value)) {
-        records.maxDamage = { value: maxDmg, ship: shipName };
-      }
-      if (maxFrags > 0 && (!records.maxFrags || maxFrags > records.maxFrags.value)) {
-        records.maxFrags = { value: maxFrags, ship: shipName };
-      }
-      if (maxExp > 0 && (!records.maxExp || maxExp > records.maxExp.value)) {
-        records.maxExp = { value: maxExp, ship: shipName };
-      }
-      if (maxPlanes > 0 && (!records.maxPlanes || maxPlanes > records.maxPlanes.value)) {
-        records.maxPlanes = { value: maxPlanes, ship: shipName };
+      // Update both per-type and 'all'
+      for (const key of [type, 'all']) {
+        if (!byMode[key]) byMode[key] = {};
+        const rec = byMode[key];
+        if (maxDmg > 0 && (!rec.maxDamage || maxDmg > rec.maxDamage.value)) {
+          rec.maxDamage = { value: maxDmg, ship: shipName };
+        }
+        if (maxFrags > 0 && (!rec.maxFrags || maxFrags > rec.maxFrags.value)) {
+          rec.maxFrags = { value: maxFrags, ship: shipName };
+        }
+        if (maxExp > 0 && (!rec.maxExp || maxExp > rec.maxExp.value)) {
+          rec.maxExp = { value: maxExp, ship: shipName };
+        }
+        if (maxPlanes > 0 && (!rec.maxPlanes || maxPlanes > rec.maxPlanes.value)) {
+          rec.maxPlanes = { value: maxPlanes, ship: shipName };
+        }
       }
     }
 
-    return records;
+    return byMode;
   }
 }

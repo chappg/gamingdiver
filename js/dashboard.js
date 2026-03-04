@@ -6,23 +6,18 @@ const CHART_COLORS = {
   teal: '#26a69a', pink: '#ec407a', indigo: '#5c6bc0', lime: '#c0ca33',
 };
 
-const chartDefaults = {
-  color: '#8899aa',
-  borderColor: '#1e3a5f',
-  backgroundColor: 'rgba(0,229,255,0.1)',
-};
-
 Chart.defaults.color = '#8899aa';
 Chart.defaults.borderColor = '#1e3a5f';
+
+// Default battle mode: Standard (3)
+const DEFAULT_MODE = 3;
 
 function fmt(n) {
   if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
   if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
   return n.toLocaleString();
 }
-
 function pct(n) { return n.toFixed(1) + '%'; }
-
 function winClass(wr) {
   if (wr >= 55) return 'win-high';
   if (wr >= 50) return 'win-mid';
@@ -35,6 +30,8 @@ class Dashboard {
     this.charts = {};
     this.shipSortCol = 'battles';
     this.shipSortDir = 'desc';
+    this.currentOverviewMode = DEFAULT_MODE; // Standard by default
+    this.currentShipMode = DEFAULT_MODE;
   }
 
   render() {
@@ -53,8 +50,34 @@ class Dashboard {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-        // Resize charts when tab shown
         Object.values(this.charts).forEach(c => c.resize?.());
+      });
+    });
+  }
+
+  // Build battle mode tabs HTML for a given container
+  buildModeTabs(containerId, currentMode, onChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const modeStats = this.r.career.modeStats;
+    
+    // Build tabs: Standard first, then other non-aggregate modes that have data, then "All Modes"
+    const modeOrder = [3, 9, 6, 17, 20, 4, 23, 28, 'all'];
+    const tabs = modeOrder.filter(m => modeStats[m] && modeStats[m].battles > 0);
+    
+    container.innerHTML = tabs.map(m => {
+      const ms = modeStats[m];
+      const name = m === 'all' ? 'All Modes' : (BATTLE_TYPES[m]?.name || `Type ${m}`);
+      const active = (m == currentMode) ? 'active' : '';
+      return `<button class="mode-tab ${active}" data-mode="${m}">${name} <span class="mode-count">(${fmt(ms.battles)})</span></button>`;
+    }).join('');
+
+    container.querySelectorAll('.mode-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.mode === 'all' ? 'all' : parseInt(btn.dataset.mode);
+        onChange(mode);
       });
     });
   }
@@ -64,22 +87,38 @@ class Dashboard {
     const c = this.r.career;
     document.getElementById('playerName').textContent = `${c.gamertag}'s Dashboard`;
 
+    // Build mode tabs for overview
+    this.buildModeTabs('overviewModeTabs', this.currentOverviewMode, (mode) => {
+      this.currentOverviewMode = mode;
+      this.refreshOverviewStats();
+    });
+
+    this.refreshOverviewStats();
+    this.renderBattleModesChart(c.modeStats);
+    this.renderCombatStyleChart();
+  }
+
+  refreshOverviewStats() {
+    const c = this.r.career;
+    const mode = this.currentOverviewMode;
+    const ms = c.modeStats[mode];
+    
+    if (!ms) return;
+
     const cards = document.getElementById('overviewCards');
     cards.innerHTML = [
-      this.statCard(fmt(c.totalBattles), 'Battles', `${c.totalSessions} sessions`),
-      this.statCard(pct(c.winRate), 'Win Rate', `${fmt(c.totalWins)} wins`, c.winRate >= 50 ? 'good' : 'bad'),
-      this.statCard(fmt(c.avgDamage), 'Avg Damage', `${fmt(c.totalDamage)} total`),
-      this.statCard(c.kd.toFixed(2), 'K/D Ratio', `${fmt(c.totalFrags)} kills`),
-      this.statCard(pct(c.survivalRate), 'Survival', ''),
-      this.statCard(`${fmt(c.totalPlayTimeHours)}h`, 'Play Time', `~${c.avgSessionMin}m avg session`),
-      this.statCard(pct(c.mainAccuracy), 'Main Acc.', ''),
-      this.statCard(pct(c.torpAccuracy), 'Torp Acc.', ''),
+      this.statCard(fmt(ms.battles), 'Battles', mode === 'all' ? `${c.totalSessions} sessions` : ''),
+      this.statCard(pct(ms.winRate), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
+      this.statCard(fmt(ms.avgDamage), 'Avg Damage', `${fmt(ms.damage)} total`),
+      this.statCard(ms.kd.toFixed(2), 'K/D Ratio', `${fmt(ms.frags)} kills`),
+      this.statCard(pct(ms.survivalRate), 'Survival', ''),
+      this.statCard(`${fmt(c.totalPlayTimeHours)}h`, 'Play Time', `~${c.avgSessionMin}m avg`),
+      this.statCard(pct(ms.mainAccuracy), 'Main Acc.', ''),
+      this.statCard(pct(ms.torpAccuracy), 'Torp Acc.', ''),
     ].join('');
 
     this.renderTopShips('battles');
     this.setupTopShipsToggle();
-    this.renderBattleModesChart(c.modeStats);
-    this.renderCombatStyleChart(c);
     this.renderRecords();
   }
 
@@ -88,9 +127,12 @@ class Dashboard {
   }
 
   renderBattleModesChart(modeStats) {
-    const entries = Object.entries(modeStats).sort(([, a], [, b]) => b.battles - a.battles);
+    const entries = Object.entries(modeStats)
+      .filter(([k]) => k !== 'all' && modeStats[k].battles > 0)
+      .sort(([, a], [, b]) => b.battles - a.battles);
     const colors = [CHART_COLORS.accent, CHART_COLORS.accent2, CHART_COLORS.teal, CHART_COLORS.orange, CHART_COLORS.purple, CHART_COLORS.pink, CHART_COLORS.indigo, CHART_COLORS.lime, CHART_COLORS.red];
 
+    if (this.charts.battleModes) this.charts.battleModes.destroy();
     this.charts.battleModes = new Chart(document.getElementById('chartBattleModes'), {
       type: 'doughnut',
       data: {
@@ -105,7 +147,7 @@ class Dashboard {
             callbacks: {
               afterLabel: (ctx) => {
                 const v = entries[ctx.dataIndex][1];
-                return `Win Rate: ${(v.wins / v.battles * 100).toFixed(1)}%`;
+                return `Win Rate: ${pct(v.winRate)}`;
               }
             }
           }
@@ -114,17 +156,28 @@ class Dashboard {
     });
   }
 
-  renderCombatStyleChart(c) {
-    // Kill breakdown from aggregate battle type stats
-    const bt = Object.values(c.modeStats);
-    let mainKills = 0, torpKills = 0, atbaKills = 0, ramKills = 0, planeKills = 0;
-    // We'll use ship data for better kill breakdown
+  renderCombatStyleChart() {
+    const mode = this.currentOverviewMode;
+    // Get kill breakdown from ships filtered by mode
+    let mainKills = 0, torpKills = 0, atbaKills = 0, ramKills = 0;
     const ships = this.r.ships || [];
-    for (const s of ships) {
-      mainKills += s.fragsByMain || 0;
-      torpKills += s.fragsByTorp || 0;
-      atbaKills += s.fragsByAtba || 0;
-      ramKills += s.fragsByRam || 0;
+    
+    if (mode === 'all') {
+      for (const s of ships) {
+        mainKills += s.fragsByMain || 0;
+        torpKills += s.fragsByTorp || 0;
+        atbaKills += s.fragsByAtba || 0;
+        ramKills += s.fragsByRam || 0;
+      }
+    } else {
+      // Per-mode kill breakdown from byMode — we only have total frags per mode, 
+      // not broken down by weapon. Use all-mode data as approximation.
+      for (const s of ships) {
+        mainKills += s.fragsByMain || 0;
+        torpKills += s.fragsByTorp || 0;
+        atbaKills += s.fragsByAtba || 0;
+        ramKills += s.fragsByRam || 0;
+      }
     }
 
     const data = [
@@ -134,6 +187,7 @@ class Dashboard {
       { label: 'Ramming', value: ramKills, color: CHART_COLORS.red },
     ].filter(d => d.value > 0);
 
+    if (this.charts.combatStyle) this.charts.combatStyle.destroy();
     this.charts.combatStyle = new Chart(document.getElementById('chartCombatStyle'), {
       type: 'doughnut',
       data: {
@@ -148,7 +202,9 @@ class Dashboard {
   }
 
   renderRecords() {
-    const rec = this.r.records;
+    const mode = this.currentOverviewMode;
+    const recByMode = this.r.records;
+    const rec = recByMode[mode] || recByMode['all'] || {};
     const grid = document.getElementById('recordsGrid');
     const cards = [];
     if (rec.maxDamage) cards.push(this.recordCard(fmt(rec.maxDamage.value), 'Max Damage', rec.maxDamage.ship));
@@ -174,9 +230,30 @@ class Dashboard {
 
   renderTopShips(metric) {
     const minBattles = 10;
-    const eligible = this.r.ships.filter(s => s.battles >= minBattles);
-    let sorted, valFn, label;
+    const mode = this.currentOverviewMode;
 
+    // Get ship stats for current mode
+    let eligible = this.r.ships.filter(s => {
+      if (mode === 'all') return s.battles >= minBattles;
+      return s.byMode[mode] && s.byMode[mode].battles >= minBattles;
+    });
+
+    // Map to mode-specific stats
+    if (mode !== 'all') {
+      eligible = eligible.map(s => {
+        const d = s.byMode[mode];
+        const deaths = d.battles - d.survived;
+        return {
+          ...s,
+          battles: d.battles, wins: d.wins, damage: d.damage, frags: d.frags,
+          winRate: d.battles > 0 ? (d.wins / d.battles * 100) : 0,
+          avgDamage: d.battles > 0 ? Math.round(d.damage / d.battles) : 0,
+          kd: deaths > 0 ? (d.frags / deaths) : d.frags,
+        };
+      });
+    }
+
+    let sorted, valFn, label;
     switch (metric) {
       case 'winRate':
         sorted = [...eligible].sort((a, b) => b.winRate - a.winRate);
@@ -216,9 +293,15 @@ class Dashboard {
   // ---- SHIPS TAB ----
   renderShips() {
     this.populateShipFilters();
+
+    // Mode tabs for ships tab
+    this.buildModeTabs('shipModeTabs', this.currentShipMode, (mode) => {
+      this.currentShipMode = mode;
+      this.renderShipTable();
+    });
+
     this.renderShipTable();
 
-    // Sort headers
     document.querySelectorAll('#shipTable th[data-sort]').forEach(th => {
       th.addEventListener('click', () => {
         const col = th.dataset.sort;
@@ -245,15 +328,10 @@ class Dashboard {
     classes.forEach(c => cSel.add(new Option(c, c)));
     const tSel = document.getElementById('filterTier');
     tiers.forEach(t => { if (t !== '?') tSel.add(new Option(`Tier ${t}`, t)); });
-
-    const mSel = document.getElementById('filterMode');
-    DISPLAY_BATTLE_TYPES.forEach(t => {
-      if (BATTLE_TYPES[t]) mSel.add(new Option(BATTLE_TYPES[t].name, t));
-    });
   }
 
   setupFilters() {
-    ['filterNation', 'filterClass', 'filterTier', 'filterMinBattles', 'filterMode'].forEach(id => {
+    ['filterNation', 'filterClass', 'filterTier', 'filterMinBattles'].forEach(id => {
       document.getElementById(id)?.addEventListener('change', () => this.renderShipTable());
     });
     ['collFilterNation', 'collFilterClass', 'collFilterTier', 'collFilterOwned'].forEach(id => {
@@ -266,18 +344,17 @@ class Dashboard {
     const cls = document.getElementById('filterClass').value;
     const tier = document.getElementById('filterTier').value;
     const minB = parseInt(document.getElementById('filterMinBattles').value) || 1;
-    const mode = document.getElementById('filterMode').value;
+    const mode = this.currentShipMode;
 
     let ships = this.r.ships;
     if (nation) ships = ships.filter(s => s.nation === nation);
     if (cls) ships = ships.filter(s => s.class === cls);
     if (tier) ships = ships.filter(s => s.tier === tier);
-    ships = ships.filter(s => s.battles >= minB);
 
-    // If mode filter, recompute stats from byMode
-    if (mode) {
-      const m = parseInt(mode);
-      ships = ships.filter(s => s.byMode[m]).map(s => {
+    // Apply mode filter
+    if (mode !== 'all') {
+      const m = typeof mode === 'string' ? parseInt(mode) : mode;
+      ships = ships.filter(s => s.byMode[m] && s.byMode[m].battles > 0).map(s => {
         const d = s.byMode[m];
         const deaths = d.battles - d.survived;
         return {
@@ -289,10 +366,12 @@ class Dashboard {
           survivalRate: d.battles > 0 ? (d.survived / d.battles * 100) : 0,
           mainAccuracy: d.shotsMain > 0 ? (d.hitsMain / d.shotsMain * 100) : 0,
           torpAccuracy: d.shotsTorp > 0 ? (d.hitsTorp / d.shotsTorp * 100) : 0,
-          shotsTorp: d.shotsTorp,
+          shotsTorp: d.shotsTorp || 0,
         };
-      }).filter(s => s.battles >= minB);
+      });
     }
+
+    ships = ships.filter(s => s.battles >= minB);
 
     // Sort
     const col = this.shipSortCol;
@@ -310,7 +389,6 @@ class Dashboard {
     const ships = this.getFilteredShips();
     const tbody = document.getElementById('shipTableBody');
 
-    // Update sort indicators
     document.querySelectorAll('#shipTable th').forEach(th => {
       th.classList.remove('sorted-asc', 'sorted-desc');
       if (th.dataset.sort === this.shipSortCol) {
@@ -323,16 +401,19 @@ class Dashboard {
         <td><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</td>
         <td>${s.nation}</td>
         <td>${s.class}</td>
-        <td class="num">${s.tier}</td>
         <td class="num">${s.battles.toLocaleString()}</td>
         <td class="num ${winClass(s.winRate)}">${pct(s.winRate)}</td>
         <td class="num">${s.avgDamage.toLocaleString()}</td>
         <td class="num">${s.kd.toFixed(2)}</td>
         <td class="num">${pct(s.survivalRate)}</td>
         <td class="num">${pct(s.mainAccuracy)}</td>
-        <td class="num">${s.shotsTorp > 0 ? pct(s.torpAccuracy) : '-'}</td>
+        <td class="num">${(s.shotsTorp || 0) > 0 ? pct(s.torpAccuracy) : '-'}</td>
       </tr>
     `).join('');
+
+    // Update count
+    const countEl = document.getElementById('shipCount');
+    if (countEl) countEl.textContent = `${ships.length} ships`;
   }
 
   // ---- TRENDS TAB ----
@@ -368,14 +449,13 @@ class Dashboard {
   }
 
   heatmapColor(intensity) {
-    // Multi-stop gradient: dark base -> deep teal -> bright cyan -> warm yellow-white
     if (intensity <= 0) return null;
     const stops = [
-      { t: 0,    r: 13,  g: 42,  b: 68  },  // deep blue
-      { t: 0.25, r: 0,   g: 105, b: 120 },  // dark teal
-      { t: 0.5,  r: 0,   g: 180, b: 200 },  // teal
-      { t: 0.75, r: 0,   g: 229, b: 255 },  // bright cyan
-      { t: 1,    r: 120, g: 255, b: 230 },  // hot glow
+      { t: 0, r: 13, g: 42, b: 68 },
+      { t: 0.25, r: 0, g: 105, b: 120 },
+      { t: 0.5, r: 0, g: 180, b: 200 },
+      { t: 0.75, r: 0, g: 229, b: 255 },
+      { t: 1, r: 120, g: 255, b: 230 },
     ];
     const t = Math.min(intensity, 1);
     let lo = stops[0], hi = stops[stops.length - 1];
@@ -395,11 +475,10 @@ class Dashboard {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     if (Object.keys(hm).length === 0) {
-      container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-dim);">No session data available</div>';
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim)">No session data</div>';
       return;
     }
 
-    // Find max for color scaling
     let maxVal = 0;
     for (const v of Object.values(hm)) maxVal = Math.max(maxVal, v);
 
@@ -419,18 +498,12 @@ class Dashboard {
       }
     }
 
-    // Color legend
-    html += '<div class="heatmap-legend">';
-    html += '<span class="heatmap-legend-label">Less</span>';
-    html += '<div class="heatmap-legend-bar">';
+    html += '<div class="heatmap-legend"><span class="heatmap-legend-label">Less</span><div class="heatmap-legend-bar">';
     for (let i = 0; i <= 4; i++) {
       const c = this.heatmapColor(i / 4) || 'rgba(255,255,255,0.02)';
       html += `<span style="background:${c}"></span>`;
     }
-    html += '</div>';
-    html += '<span class="heatmap-legend-label">More</span>';
-    html += '</div>';
-
+    html += '</div><span class="heatmap-legend-label">More</span></div>';
     container.innerHTML = html;
   }
 
@@ -459,7 +532,6 @@ class Dashboard {
   renderCollection() {
     const coll = this.r.collection;
 
-    // Stats
     const statsEl = document.getElementById('collectionStats');
     statsEl.innerHTML = [
       `<div class="collection-stat"><span class="cs-num">${coll.owned}</span><span class="cs-label">Ships Owned</span></div>`,
@@ -468,7 +540,6 @@ class Dashboard {
       `<div class="collection-stat"><span class="cs-num">${coll.nations.length}</span><span class="cs-label">Nations</span></div>`,
     ].join('');
 
-    // Filters
     const nSel = document.getElementById('collFilterNation');
     coll.nations.forEach(n => nSel.add(new Option(n, n)));
     const cSel = document.getElementById('collFilterClass');

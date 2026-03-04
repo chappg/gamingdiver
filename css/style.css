@@ -134,6 +134,20 @@ body {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
+/* Mode tabs (battle type selector) */
+.mode-tabs {
+  display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
+  flex-wrap: wrap;
+}
+.mode-tab {
+  padding: 6px 14px; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-dim); cursor: pointer;
+  font-size: 0.85em; font-weight: 500; transition: all 0.2s; white-space: nowrap;
+}
+.mode-tab:hover { border-color: var(--accent-dim); color: var(--text); }
+.mode-tab.active { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
+.mode-count { font-size: 0.85em; opacity: 0.7; }
+
 /* Stat cards */
 .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card {
