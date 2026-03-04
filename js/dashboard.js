@@ -12,6 +12,15 @@ Chart.defaults.borderColor = '#1e3a5f';
 // Default battle mode: Standard (3)
 const DEFAULT_MODE = 3;
 
+// Nation display order and icons (shared across all tabs)
+const NATION_ICONS = {
+  'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
+  'France': '🇫🇷', 'U.S.S.R.': '☭', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
+  'Pan-Asia': '🐉', 'Commonwealth': '🌏', 'Pan-America': '🌎',
+  'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '⚡',
+};
+const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
+
 function fmt(n) {
   if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
   if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
@@ -36,10 +45,10 @@ class Dashboard {
   }
 
   render() {
-    this.renderOverview();
-    this.renderShips();
-    this.renderTrends();
-    this.renderCollection();
+    try { this.renderOverview(); } catch(e) { console.error('renderOverview:', e); }
+    try { this.renderShips(); } catch(e) { console.error('renderShips:', e); }
+    try { this.renderTrends(); } catch(e) { console.error('renderTrends:', e); }
+    try { this.renderCollection(); } catch(e) { console.error('renderCollection:', e); }
     this.setupTabs();
     this.setupFilters();
   }
@@ -232,15 +241,6 @@ class Dashboard {
     this.collFilterTier = '';
     this.collFilterClass = '';
     this.collFilterType = '';
-
-    // Nation icon mapping + display order
-    const NATION_ICONS = {
-      'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
-      'France': '🇫🇷', 'U.S.S.R.': '☭', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
-      'Pan-Asia': '🐉', 'Commonwealth': '🌏', 'Pan-America': '🌎',
-      'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '⚡',
-    };
-    const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
     // Build nation icons
     const ships = this.r.ships;
