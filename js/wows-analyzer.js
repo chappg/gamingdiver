@@ -235,45 +235,8 @@ class WoWSAnalyzer {
       }
     }
 
-    // Merge ships with identical display names (variants like _B, _R, _AL)
-    const mergedMap = {};
-    for (const s of Object.values(shipMap)) {
-      const key = s.name + '|' + s.nation + '|' + s.class;
-      if (!mergedMap[key]) {
-        mergedMap[key] = { ...s };
-      } else {
-        const m = mergedMap[key];
-        m.battles += s.battles; m.wins += s.wins; m.losses += s.losses;
-        m.survived += s.survived; m.frags += s.frags; m.damage += s.damage;
-        m.planesKilled += s.planesKilled;
-        m.shotsMain += s.shotsMain; m.hitsMain += s.hitsMain;
-        m.shotsTorp += s.shotsTorp; m.hitsTorp += s.hitsTorp;
-        m.shotsAtba += s.shotsAtba; m.hitsAtba += s.hitsAtba;
-        m.fragsByMain += s.fragsByMain; m.fragsByTorp += s.fragsByTorp;
-        m.fragsByAtba += s.fragsByAtba; m.fragsByRam += s.fragsByRam;
-        m.maxDamage = Math.max(m.maxDamage, s.maxDamage);
-        m.maxFrags = Math.max(m.maxFrags, s.maxFrags);
-        m.maxExp = Math.max(m.maxExp, s.maxExp);
-        // Merge byMode
-        for (const [mode, d] of Object.entries(s.byMode)) {
-          if (!m.byMode[mode]) {
-            m.byMode[mode] = { ...d };
-          } else {
-            const mm = m.byMode[mode];
-            mm.battles += d.battles; mm.wins += d.wins; mm.damage += d.damage;
-            mm.frags += d.frags; mm.survived += d.survived;
-            mm.shotsMain += d.shotsMain; mm.hitsMain += d.hitsMain;
-            mm.shotsTorp += d.shotsTorp; mm.hitsTorp += d.hitsTorp;
-          }
-        }
-        // Keep premium if either is premium, inGarage if either is
-        if (s.premium) m.premium = true;
-        if (s.inGarage) m.inGarage = true;
-      }
-    }
-
     // Compute derived stats
-    const ships = Object.values(mergedMap).map(s => {
+    const ships = Object.values(shipMap).map(s => {
       const deaths = s.battles - s.survived;
       return {
         ...s,
