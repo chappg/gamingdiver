@@ -222,6 +222,7 @@ class Dashboard {
     this.currentTopMetric = 'battles';
     this.topFilterNation = '';
     this.topFilterTier = '';
+    this.topFilterType = '';
 
     // Nation icon mapping + display order
     const NATION_ICONS = {
@@ -264,6 +265,16 @@ class Dashboard {
       });
     });
 
+    // Type buttons (All / Tech Tree / Premium)
+    document.querySelectorAll('#topTypeButtons .tier-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#topTypeButtons .tier-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.topFilterType = btn.dataset.type;
+        this.renderTopShips();
+      });
+    });
+
     // Metric toggle buttons
     document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -281,6 +292,7 @@ class Dashboard {
     const mode = this.currentOverviewMode;
     const filterNation = this.topFilterNation || '';
     const filterTier = this.topFilterTier || '';
+    const filterType = this.topFilterType || '';
 
     // Get ship stats for current mode
     let eligible = this.r.ships.filter(s => {
@@ -303,9 +315,11 @@ class Dashboard {
       });
     }
 
-    // Apply nation/tier filters
+    // Apply nation/tier/type filters
     if (filterNation) eligible = eligible.filter(s => s.nation === filterNation);
     if (filterTier) eligible = eligible.filter(s => s.tier === filterTier);
+    if (filterType === 'tech') eligible = eligible.filter(s => !s.premium);
+    if (filterType === 'premium') eligible = eligible.filter(s => s.premium);
 
     let sorted, valFn, label;
     switch (metric) {
