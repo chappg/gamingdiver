@@ -82,10 +82,19 @@
       <div class="chart-row">
         <div class="chart-box wide">
           <h3>Top 10 Ships</h3>
-          <div class="top-ships-toggle" id="topShipsToggle">
-            <button class="toggle-btn active" data-metric="battles">Most Played</button>
-            <button class="toggle-btn" data-metric="winRate">Best Win Rate</button>
-            <button class="toggle-btn" data-metric="avgDamage">Highest Damage</button>
+          <div class="top-ships-controls">
+            <div class="top-ships-toggle" id="topShipsToggle">
+              <button class="toggle-btn active" data-metric="battles">Most Played</button>
+              <button class="toggle-btn" data-metric="leastBattles">Least Played</button>
+              <button class="toggle-btn" data-metric="winRate">Best Win Rate</button>
+              <button class="toggle-btn" data-metric="lowestWinRate">Lowest Win Rate</button>
+              <button class="toggle-btn" data-metric="avgDamage">Highest Damage</button>
+              <button class="toggle-btn" data-metric="lowestDamage">Lowest Damage</button>
+            </div>
+            <div class="top-ships-filters">
+              <select id="topFilterNation"><option value="">All Nations</option></select>
+              <select id="topFilterTier"><option value="">All Tiers</option></select>
+            </div>
           </div>
           <div id="topShipsGrid" class="top-ships-grid"></div>
         </div>

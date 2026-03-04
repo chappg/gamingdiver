@@ -219,18 +219,36 @@ class Dashboard {
   }
 
   setupTopShipsToggle() {
+    this.currentTopMetric = 'battles';
+
+    // Populate tier/nation filters from ship data
+    const ships = this.r.ships;
+    const nations = [...new Set(ships.map(s => s.nation))].sort();
+    const tiers = [...new Set(ships.map(s => s.tier))].filter(t => t !== '?').sort((a, b) => tierNum(a) - tierNum(b));
+    const nSel = document.getElementById('topFilterNation');
+    nations.forEach(n => nSel.add(new Option(n, n)));
+    const tSel = document.getElementById('topFilterTier');
+    tiers.forEach(t => tSel.add(new Option(`Tier ${t}`, t)));
+
     document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        this.renderTopShips(btn.dataset.metric);
+        this.currentTopMetric = btn.dataset.metric;
+        this.renderTopShips();
       });
     });
+
+    document.getElementById('topFilterNation')?.addEventListener('change', () => this.renderTopShips());
+    document.getElementById('topFilterTier')?.addEventListener('change', () => this.renderTopShips());
   }
 
-  renderTopShips(metric) {
+  renderTopShips() {
+    const metric = this.currentTopMetric || 'battles';
     const minBattles = 10;
     const mode = this.currentOverviewMode;
+    const filterNation = document.getElementById('topFilterNation')?.value || '';
+    const filterTier = document.getElementById('topFilterTier')?.value || '';
 
     // Get ship stats for current mode
     let eligible = this.r.ships.filter(s => {
@@ -253,41 +271,50 @@ class Dashboard {
       });
     }
 
+    // Apply nation/tier filters
+    if (filterNation) eligible = eligible.filter(s => s.nation === filterNation);
+    if (filterTier) eligible = eligible.filter(s => s.tier === filterTier);
+
     let sorted, valFn, label;
     switch (metric) {
       case 'winRate':
         sorted = [...eligible].sort((a, b) => b.winRate - a.winRate);
-        valFn = s => pct(s.winRate);
-        label = 'Win %';
-        break;
+        valFn = s => pct(s.winRate); label = 'Win %'; break;
+      case 'lowestWinRate':
+        sorted = [...eligible].sort((a, b) => a.winRate - b.winRate);
+        valFn = s => pct(s.winRate); label = 'Win %'; break;
       case 'avgDamage':
         sorted = [...eligible].sort((a, b) => b.avgDamage - a.avgDamage);
-        valFn = s => fmt(s.avgDamage);
-        label = 'Avg Dmg';
-        break;
+        valFn = s => fmt(s.avgDamage); label = 'Avg Dmg'; break;
+      case 'lowestDamage':
+        sorted = [...eligible].sort((a, b) => a.avgDamage - b.avgDamage);
+        valFn = s => fmt(s.avgDamage); label = 'Avg Dmg'; break;
+      case 'leastBattles':
+        sorted = [...eligible].sort((a, b) => a.battles - b.battles);
+        valFn = s => s.battles.toLocaleString(); label = 'Battles'; break;
       default:
         sorted = [...eligible].sort((a, b) => b.battles - a.battles);
-        valFn = s => s.battles.toLocaleString();
-        label = 'Battles';
+        valFn = s => s.battles.toLocaleString(); label = 'Battles'; break;
     }
 
+    const isBottom = ['lowestWinRate', 'lowestDamage', 'leastBattles'].includes(metric);
     const top10 = sorted.slice(0, 10);
     const grid = document.getElementById('topShipsGrid');
     grid.innerHTML = top10.map((s, i) => {
-      const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      const rankCls = isBottom ? '' : (i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '');
       return `
         <div class="top-ship-card">
           <div class="top-ship-rank ${rankCls}">${i + 1}</div>
           <div class="top-ship-info">
             <div class="top-ship-name"><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</div>
-            <div class="top-ship-meta">${s.nation} • ${s.class}</div>
+            <div class="top-ship-meta">${s.nation} • ${s.class} • ${s.battles} battles</div>
           </div>
           <div class="top-ship-stat">
             <div class="ts-val">${valFn(s)}</div>
             <div class="ts-label">${label}</div>
           </div>
         </div>`;
-    }).join('');
+    }).join('') || '<div style="padding:16px;color:var(--text-dim)">No ships match these filters</div>';
   }
 
   // ---- SHIPS TAB ----

@@ -175,7 +175,15 @@ body {
 .chart-box h3 { color: var(--text-dim); font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 
 /* Top 10 Ships */
-.top-ships-toggle { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.top-ships-controls { margin-bottom: 16px; }
+.top-ships-filters {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.top-ships-filters select {
+  padding: 6px 10px; background: var(--bg-mid); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-size: 0.85em;
+}
+.top-ships-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
 .toggle-btn {
   padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--border);
   background: var(--bg-mid); color: var(--text-dim); cursor: pointer;
