@@ -180,9 +180,9 @@ body {
   display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
 }
 .top-filter-inline {
-  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
 }
-.type-buttons { display: flex; gap: 4px; }
+.type-buttons { display: flex; gap: 4px; margin-left: auto; }
 .nation-icons { display: flex; gap: 4px; flex-wrap: wrap; }
 .nation-btn {
   width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
