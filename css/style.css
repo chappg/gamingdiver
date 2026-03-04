@@ -183,6 +183,8 @@ body {
   display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
 }
 .type-buttons { display: flex; gap: 4px; margin-left: auto; }
+.class-buttons { display: flex; gap: 4px; }
+.ship-filter-row, .coll-filter-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .nation-icons { display: flex; gap: 4px; flex-wrap: wrap; }
 .nation-btn {
   width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;

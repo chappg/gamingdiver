@@ -130,14 +130,23 @@
     <!-- Ship Performance Tab -->
     <div class="tab-content" id="tab-ships">
       <div class="mode-tabs" id="shipModeTabs"></div>
-      <div class="filters">
-        <select id="filterNation"><option value="">All Nations</option></select>
-        <select id="filterClass"><option value="">All Classes</option></select>
-        <select id="filterTier"><option value="">All Tiers</option></select>
-        <label class="min-battles-label">
-          Min battles: <input type="number" id="filterMinBattles" value="10" min="1" max="500">
-        </label>
-        <span id="shipCount" style="color:var(--text-dim);font-size:0.9em"></span>
+      <div class="ship-filter-row">
+        <div class="top-filter-inline">
+          <div class="nation-icons" id="shipNationIcons"></div>
+          <div class="type-buttons" id="shipTypeButtons">
+            <button class="tier-btn active" data-type="">All</button>
+            <button class="tier-btn" data-type="tech">Tech Tree</button>
+            <button class="tier-btn" data-type="premium">Premium</button>
+          </div>
+        </div>
+        <div class="top-filter-inline">
+          <div class="tier-buttons" id="shipTierButtons"></div>
+          <div class="class-buttons" id="shipClassButtons"></div>
+          <label class="min-battles-label">
+            Min: <input type="number" id="filterMinBattles" value="10" min="1" max="500">
+          </label>
+          <span id="shipCount" style="color:var(--text-dim);font-size:0.9em"></span>
+        </div>
       </div>
       <div class="table-container">
         <table id="shipTable" class="data-table">
@@ -186,11 +195,20 @@
     <!-- Collection Tab -->
     <div class="tab-content" id="tab-collection">
       <div class="collection-stats" id="collectionStats"></div>
-      <div class="filters">
-        <select id="collFilterNation"><option value="">All Nations</option></select>
-        <select id="collFilterClass"><option value="">All Classes</option></select>
-        <select id="collFilterTier"><option value="">All Tiers</option></select>
-        <label><input type="checkbox" id="collFilterOwned"> Owned only</label>
+      <div class="coll-filter-row">
+        <div class="top-filter-inline">
+          <div class="nation-icons" id="collNationIcons"></div>
+          <div class="type-buttons" id="collTypeButtons">
+            <button class="tier-btn active" data-type="">All</button>
+            <button class="tier-btn" data-type="tech">Tech Tree</button>
+            <button class="tier-btn" data-type="premium">Premium</button>
+          </div>
+        </div>
+        <div class="top-filter-inline">
+          <div class="tier-buttons" id="collTierButtons"></div>
+          <div class="class-buttons" id="collClassButtons"></div>
+          <label><input type="checkbox" id="collFilterOwned"> Owned only</label>
+        </div>
       </div>
       <div class="collection-grid" id="collectionGrid"></div>
     </div>
