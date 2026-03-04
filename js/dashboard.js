@@ -335,6 +335,12 @@ class Dashboard {
       case 'lowestDamage':
         sorted = [...eligible].sort((a, b) => a.avgDamage - b.avgDamage);
         valFn = s => fmt(s.avgDamage); label = 'Avg Dmg'; break;
+      case 'kd':
+        sorted = [...eligible].sort((a, b) => b.kd - a.kd);
+        valFn = s => s.kd.toFixed(2); label = 'K/D'; break;
+      case 'maxFrags':
+        sorted = [...eligible].sort((a, b) => b.maxFrags - a.maxFrags);
+        valFn = s => s.maxFrags.toString(); label = 'Max Kills'; break;
       case 'leastBattles':
         sorted = [...eligible].sort((a, b) => a.battles - b.battles);
         valFn = s => s.battles.toLocaleString(); label = 'Battles'; break;
