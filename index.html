@@ -77,6 +77,17 @@
     <div class="tab-content active" id="tab-overview">
       <div class="stat-cards" id="overviewCards"></div>
       <div class="chart-row">
+        <div class="chart-box wide">
+          <h3>Top 10 Ships</h3>
+          <div class="top-ships-toggle" id="topShipsToggle">
+            <button class="toggle-btn active" data-metric="battles">Most Played</button>
+            <button class="toggle-btn" data-metric="winRate">Best Win Rate</button>
+            <button class="toggle-btn" data-metric="avgDamage">Highest Damage</button>
+          </div>
+          <div id="topShipsGrid" class="top-ships-grid"></div>
+        </div>
+      </div>
+      <div class="chart-row">
         <div class="chart-box">
           <h3>Battles by Mode</h3>
           <canvas id="chartBattleModes"></canvas>
@@ -117,9 +128,9 @@
               <th data-sort="winRate" class="num">Win %</th>
               <th data-sort="avgDamage" class="num">Avg Dmg</th>
               <th data-sort="kd" class="num">K/D</th>
-              <th data-sort="survival" class="num">Surv %</th>
-              <th data-sort="mainAcc" class="num">Main Acc %</th>
-              <th data-sort="torpAcc" class="num">Torp Acc %</th>
+              <th data-sort="survivalRate" class="num">Surv %</th>
+              <th data-sort="mainAccuracy" class="num">Main Acc %</th>
+              <th data-sort="torpAccuracy" class="num">Torp Acc %</th>
             </tr>
           </thead>
           <tbody id="shipTableBody"></tbody>

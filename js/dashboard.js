@@ -76,6 +76,8 @@ class Dashboard {
       this.statCard(pct(c.torpAccuracy), 'Torp Acc.', ''),
     ].join('');
 
+    this.renderTopShips('battles');
+    this.setupTopShipsToggle();
     this.renderBattleModesChart(c.modeStats);
     this.renderCombatStyleChart(c);
     this.renderRecords();
@@ -149,15 +151,66 @@ class Dashboard {
     const rec = this.r.records;
     const grid = document.getElementById('recordsGrid');
     const cards = [];
-    if (rec.maxDamage) cards.push(this.recordCard(fmt(rec.maxDamage.value), 'Max Damage', rec.maxDamage.mode));
-    if (rec.maxFrags) cards.push(this.recordCard(rec.maxFrags.value, 'Max Kills', rec.maxFrags.mode));
-    if (rec.maxExp) cards.push(this.recordCard(fmt(rec.maxExp.value), 'Max XP', rec.maxExp.mode));
-    if (rec.maxPlanes) cards.push(this.recordCard(rec.maxPlanes.value, 'Max Planes Shot', rec.maxPlanes.mode));
+    if (rec.maxDamage) cards.push(this.recordCard(fmt(rec.maxDamage.value), 'Max Damage', rec.maxDamage.ship));
+    if (rec.maxFrags) cards.push(this.recordCard(rec.maxFrags.value, 'Max Kills', rec.maxFrags.ship));
+    if (rec.maxExp) cards.push(this.recordCard(fmt(rec.maxExp.value), 'Max XP', rec.maxExp.ship));
+    if (rec.maxPlanes) cards.push(this.recordCard(rec.maxPlanes.value, 'Max Planes Shot', rec.maxPlanes.ship));
     grid.innerHTML = cards.join('');
   }
 
   recordCard(value, label, ship) {
     return `<div class="record-card"><div class="record-value">${value}</div><div class="record-label">${label}</div><div class="record-ship">${ship}</div></div>`;
+  }
+
+  setupTopShipsToggle() {
+    document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.renderTopShips(btn.dataset.metric);
+      });
+    });
+  }
+
+  renderTopShips(metric) {
+    const minBattles = 10;
+    const eligible = this.r.ships.filter(s => s.battles >= minBattles);
+    let sorted, valFn, label;
+
+    switch (metric) {
+      case 'winRate':
+        sorted = [...eligible].sort((a, b) => b.winRate - a.winRate);
+        valFn = s => pct(s.winRate);
+        label = 'Win %';
+        break;
+      case 'avgDamage':
+        sorted = [...eligible].sort((a, b) => b.avgDamage - a.avgDamage);
+        valFn = s => fmt(s.avgDamage);
+        label = 'Avg Dmg';
+        break;
+      default:
+        sorted = [...eligible].sort((a, b) => b.battles - a.battles);
+        valFn = s => s.battles.toLocaleString();
+        label = 'Battles';
+    }
+
+    const top10 = sorted.slice(0, 10);
+    const grid = document.getElementById('topShipsGrid');
+    grid.innerHTML = top10.map((s, i) => {
+      const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      return `
+        <div class="top-ship-card">
+          <div class="top-ship-rank ${rankCls}">${i + 1}</div>
+          <div class="top-ship-info">
+            <div class="top-ship-name"><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</div>
+            <div class="top-ship-meta">${s.nation} • ${s.class}</div>
+          </div>
+          <div class="top-ship-stat">
+            <div class="ts-val">${valFn(s)}</div>
+            <div class="ts-label">${label}</div>
+          </div>
+        </div>`;
+    }).join('');
   }
 
   // ---- SHIPS TAB ----
@@ -219,7 +272,7 @@ class Dashboard {
     if (nation) ships = ships.filter(s => s.nation === nation);
     if (cls) ships = ships.filter(s => s.class === cls);
     if (tier) ships = ships.filter(s => s.tier === tier);
-    if (minB > 1) ships = ships.filter(s => s.battles >= minB);
+    ships = ships.filter(s => s.battles >= minB);
 
     // If mode filter, recompute stats from byMode
     if (mode) {
@@ -234,6 +287,9 @@ class Dashboard {
           avgDamage: d.battles > 0 ? Math.round(d.damage / d.battles) : 0,
           kd: deaths > 0 ? (d.frags / deaths) : d.frags,
           survivalRate: d.battles > 0 ? (d.survived / d.battles * 100) : 0,
+          mainAccuracy: d.shotsMain > 0 ? (d.hitsMain / d.shotsMain * 100) : 0,
+          torpAccuracy: d.shotsTorp > 0 ? (d.hitsTorp / d.shotsTorp * 100) : 0,
+          shotsTorp: d.shotsTorp,
         };
       }).filter(s => s.battles >= minB);
     }
@@ -311,10 +367,37 @@ class Dashboard {
     });
   }
 
+  heatmapColor(intensity) {
+    // Multi-stop gradient: dark base -> deep teal -> bright cyan -> warm yellow-white
+    if (intensity <= 0) return null;
+    const stops = [
+      { t: 0,    r: 13,  g: 42,  b: 68  },  // deep blue
+      { t: 0.25, r: 0,   g: 105, b: 120 },  // dark teal
+      { t: 0.5,  r: 0,   g: 180, b: 200 },  // teal
+      { t: 0.75, r: 0,   g: 229, b: 255 },  // bright cyan
+      { t: 1,    r: 120, g: 255, b: 230 },  // hot glow
+    ];
+    const t = Math.min(intensity, 1);
+    let lo = stops[0], hi = stops[stops.length - 1];
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (t >= stops[i].t && t <= stops[i + 1].t) { lo = stops[i]; hi = stops[i + 1]; break; }
+    }
+    const f = (hi.t - lo.t) > 0 ? (t - lo.t) / (hi.t - lo.t) : 0;
+    const r = Math.round(lo.r + (hi.r - lo.r) * f);
+    const g = Math.round(lo.g + (hi.g - lo.g) * f);
+    const b = Math.round(lo.b + (hi.b - lo.b) * f);
+    return `rgb(${r},${g},${b})`;
+  }
+
   renderHeatmap() {
     const hm = this.r.trends.heatmap;
     const container = document.getElementById('heatmapContainer');
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    if (Object.keys(hm).length === 0) {
+      container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-dim);">No session data available</div>';
+      return;
+    }
 
     // Find max for color scaling
     let maxVal = 0;
@@ -329,10 +412,24 @@ class Dashboard {
       for (let d = 0; d < 7; d++) {
         const val = hm[`${d}_${h}`] || 0;
         const intensity = maxVal > 0 ? val / maxVal : 0;
-        const bg = `rgba(0,229,255,${(intensity * 0.8).toFixed(2)})`;
-        html += `<div class="heatmap-cell" style="background:${bg}" title="${days[d]} ${label}: ${val} sessions">${val || ''}</div>`;
+        const color = this.heatmapColor(intensity);
+        const bg = color ? `background:${color}` : '';
+        const cls = val === 0 ? ' empty' : '';
+        html += `<div class="heatmap-cell${cls}" style="${bg}" title="${days[d]} ${label}: ${val} sessions">${val || ''}</div>`;
       }
     }
+
+    // Color legend
+    html += '<div class="heatmap-legend">';
+    html += '<span class="heatmap-legend-label">Less</span>';
+    html += '<div class="heatmap-legend-bar">';
+    for (let i = 0; i <= 4; i++) {
+      const c = this.heatmapColor(i / 4) || 'rgba(255,255,255,0.02)';
+      html += `<span style="background:${c}"></span>`;
+    }
+    html += '</div>';
+    html += '<span class="heatmap-legend-label">More</span>';
+    html += '</div>';
 
     container.innerHTML = html;
   }

@@ -155,6 +155,39 @@ body {
 .chart-box.wide { grid-column: 1 / -1; }
 .chart-box h3 { color: var(--text-dim); font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 
+/* Top 10 Ships */
+.top-ships-toggle { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.toggle-btn {
+  padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--bg-mid); color: var(--text-dim); cursor: pointer;
+  font-size: 0.82em; font-weight: 600; transition: all 0.2s;
+}
+.toggle-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+.toggle-btn.active { background: rgba(0,229,255,0.12); border-color: var(--accent); color: var(--accent); }
+.top-ships-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;
+}
+.top-ship-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-mid); border-radius: var(--radius); padding: 12px 14px;
+  border-left: 3px solid var(--accent); transition: background 0.2s;
+}
+.top-ship-card:hover { background: var(--bg-card-hover); }
+.top-ship-rank {
+  font-size: 1.3em; font-weight: 800; color: var(--accent-dim); min-width: 28px; text-align: center;
+}
+.top-ship-rank.gold { color: #ffd700; }
+.top-ship-rank.silver { color: #c0c0c0; }
+.top-ship-rank.bronze { color: #cd7f32; }
+.top-ship-info { flex: 1; min-width: 0; }
+.top-ship-name { font-weight: 600; color: var(--text-bright); font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-ship-meta { font-size: 0.78em; color: var(--text-dim); margin-top: 2px; }
+.top-ship-stat {
+  text-align: right; min-width: 60px;
+}
+.top-ship-stat .ts-val { font-size: 1.2em; font-weight: 700; color: var(--text-bright); }
+.top-ship-stat .ts-label { font-size: 0.7em; color: var(--text-dim); text-transform: uppercase; }
+
 /* Records */
 .records-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .record-card {
@@ -205,14 +238,28 @@ body {
 .win-low { color: var(--red); }
 
 /* Heatmap */
-.heatmap-container { display: grid; grid-template-columns: auto repeat(7, 1fr); gap: 2px; font-size: 0.75em; }
-.heatmap-label { display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; color: var(--text-dim); }
-.heatmap-header { text-align: center; color: var(--text-dim); font-weight: 600; padding: 4px; }
+.heatmap-container { display: grid; grid-template-columns: auto repeat(7, 1fr); gap: 3px; font-size: 0.75em; }
+.heatmap-label { display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; color: var(--text-dim); font-weight: 500; }
+.heatmap-header { text-align: center; color: var(--text-dim); font-weight: 600; padding: 4px 4px 8px; }
 .heatmap-cell {
-  aspect-ratio: 1; border-radius: 3px; display: flex; align-items: center; justify-content: center;
-  font-size: 0.8em; color: transparent; transition: background 0.2s;
+  aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.8em; color: transparent; transition: all 0.2s; position: relative; cursor: default;
+  min-height: 22px;
 }
-.heatmap-cell:hover { color: var(--text-bright); }
+.heatmap-cell:hover {
+  color: var(--text-bright); transform: scale(1.15); z-index: 2;
+  box-shadow: 0 0 10px rgba(0,229,255,0.4);
+}
+.heatmap-cell.empty { background: rgba(255,255,255,0.02); }
+.heatmap-legend {
+  display: flex; align-items: center; gap: 6px; margin-top: 14px; justify-content: center;
+  font-size: 0.8em; color: var(--text-dim); grid-column: 1 / -1;
+}
+.heatmap-legend-label { font-size: 0.85em; }
+.heatmap-legend-bar {
+  display: flex; height: 12px; border-radius: 3px; overflow: hidden;
+}
+.heatmap-legend-bar span { width: 20px; }
 
 /* Collection */
 .collection-stats { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }

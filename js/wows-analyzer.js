@@ -199,7 +199,7 @@ class WoWSAnalyzer {
 
       // Per-mode breakdown
       if (!s.byMode[type]) {
-        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0 };
+        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0 };
       }
       const m = s.byMode[type];
       m.battles += battles;
@@ -207,6 +207,10 @@ class WoWSAnalyzer {
       m.damage += parseInt(row.DAMAGE_DEALT) || 0;
       m.frags += parseInt(row.FRAGS) || 0;
       m.survived += parseInt(row.SURVIVED) || 0;
+      m.shotsMain += parseInt(row.SHOTS_BY_MAIN) || 0;
+      m.hitsMain += parseInt(row.HITS_BY_MAIN) || 0;
+      m.shotsTorp += parseInt(row.SHOTS_BY_TPD) || 0;
+      m.hitsTorp += parseInt(row.HITS_BY_TPD) || 0;
     }
 
     // Merge in garage status from ship stats
@@ -305,28 +309,32 @@ class WoWSAnalyzer {
   }
 
   analyzeRecords() {
-    const bt = this.data['WOWSL_Battle_Types_Statistics'] || [];
+    const shipByType = this.data['WOWSL_Ship_Statistics_By_Type'] || [];
     const records = {};
 
-    for (const row of bt) {
+    for (const row of shipByType) {
       const type = parseInt(row.TYPE);
       if (BATTLE_TYPES[type]?.aggregate) continue;
+      const vname = row.VEHICLE_NAME;
+      const info = resolveVehicle(vname);
+      const shipName = info.name;
+
       const maxDmg = parseInt(row.MAX_DAMAGE_DEALT) || 0;
       const maxFrags = parseInt(row.MAX_FRAGS) || 0;
       const maxExp = parseInt(row.MAX_EXP) || 0;
       const maxPlanes = parseInt(row.MAX_PLANES_KILLED) || 0;
 
-      if (!records.maxDamage || maxDmg > records.maxDamage.value) {
-        records.maxDamage = { value: maxDmg, mode: BATTLE_TYPES[type]?.name || `Type ${type}` };
+      if (maxDmg > 0 && (!records.maxDamage || maxDmg > records.maxDamage.value)) {
+        records.maxDamage = { value: maxDmg, ship: shipName };
       }
-      if (!records.maxFrags || maxFrags > records.maxFrags.value) {
-        records.maxFrags = { value: maxFrags, mode: BATTLE_TYPES[type]?.name || `Type ${type}` };
+      if (maxFrags > 0 && (!records.maxFrags || maxFrags > records.maxFrags.value)) {
+        records.maxFrags = { value: maxFrags, ship: shipName };
       }
-      if (!records.maxExp || maxExp > records.maxExp.value) {
-        records.maxExp = { value: maxExp, mode: BATTLE_TYPES[type]?.name || `Type ${type}` };
+      if (maxExp > 0 && (!records.maxExp || maxExp > records.maxExp.value)) {
+        records.maxExp = { value: maxExp, ship: shipName };
       }
-      if (!records.maxPlanes || maxPlanes > records.maxPlanes.value) {
-        records.maxPlanes = { value: maxPlanes, mode: BATTLE_TYPES[type]?.name || `Type ${type}` };
+      if (maxPlanes > 0 && (!records.maxPlanes || maxPlanes > records.maxPlanes.value)) {
+        records.maxPlanes = { value: maxPlanes, ship: shipName };
       }
     }
 
