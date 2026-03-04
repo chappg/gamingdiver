@@ -220,16 +220,49 @@ class Dashboard {
 
   setupTopShipsToggle() {
     this.currentTopMetric = 'battles';
+    this.topFilterNation = '';
+    this.topFilterTier = '';
 
-    // Populate tier/nation filters from ship data
+    // Nation icon mapping
+    const NATION_ICONS = {
+      'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'Germany': '🇩🇪', 'U.K.': '🇬🇧',
+      'France': '🇫🇷', 'Italy': '🇮🇹', 'U.S.S.R.': '☭', 'Europe': '🇪🇺',
+      'Pan-Asia': '🐉', 'Netherlands': '🇳🇱', 'Commonwealth': '🌏', 'Spain': '🇪🇸',
+      'Pan-America': '🌎', 'Event': '⚡',
+    };
+
+    // Build nation icons
     const ships = this.r.ships;
     const nations = [...new Set(ships.map(s => s.nation))].sort();
-    const tiers = [...new Set(ships.map(s => s.tier))].filter(t => t !== '?').sort((a, b) => tierNum(a) - tierNum(b));
-    const nSel = document.getElementById('topFilterNation');
-    nations.forEach(n => nSel.add(new Option(n, n)));
-    const tSel = document.getElementById('topFilterTier');
-    tiers.forEach(t => tSel.add(new Option(`Tier ${t}`, t)));
+    const nationContainer = document.getElementById('topNationIcons');
+    nationContainer.innerHTML = `<button class="nation-btn active" data-nation="" title="All Nations">🌐</button>` +
+      nations.map(n => `<button class="nation-btn" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '🏳️'}</button>`).join('');
 
+    nationContainer.querySelectorAll('.nation-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        nationContainer.querySelectorAll('.nation-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.topFilterNation = btn.dataset.nation;
+        this.renderTopShips();
+      });
+    });
+
+    // Build tier buttons
+    const tiers = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', '★'];
+    const tierContainer = document.getElementById('topTierButtons');
+    tierContainer.innerHTML = `<button class="tier-btn active" data-tier="">All</button>` +
+      tiers.map(t => `<button class="tier-btn" data-tier="${t}">${t}</button>`).join('');
+
+    tierContainer.querySelectorAll('.tier-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tierContainer.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.topFilterTier = btn.dataset.tier;
+        this.renderTopShips();
+      });
+    });
+
+    // Metric toggle buttons
     document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(b => b.classList.remove('active'));
@@ -238,17 +271,14 @@ class Dashboard {
         this.renderTopShips();
       });
     });
-
-    document.getElementById('topFilterNation')?.addEventListener('change', () => this.renderTopShips());
-    document.getElementById('topFilterTier')?.addEventListener('change', () => this.renderTopShips());
   }
 
   renderTopShips() {
     const metric = this.currentTopMetric || 'battles';
     const minBattles = 10;
     const mode = this.currentOverviewMode;
-    const filterNation = document.getElementById('topFilterNation')?.value || '';
-    const filterTier = document.getElementById('topFilterTier')?.value || '';
+    const filterNation = this.topFilterNation || '';
+    const filterTier = this.topFilterTier || '';
 
     // Get ship stats for current mode
     let eligible = this.r.ships.filter(s => {
@@ -347,14 +377,17 @@ class Dashboard {
     const ships = this.r.ships;
     const nations = [...new Set(ships.map(s => s.nation))].sort();
     const classes = [...new Set(ships.map(s => s.class))].sort();
-    const tiers = [...new Set(ships.map(s => s.tier))].sort((a, b) => tierNum(a) - tierNum(b));
+    // Deduplicate tiers properly
+    const tierSet = new Set();
+    ships.forEach(s => { if (s.tier && s.tier !== '?') tierSet.add(s.tier); });
+    const tiers = [...tierSet].sort((a, b) => tierNum(a) - tierNum(b));
 
     const nSel = document.getElementById('filterNation');
     nations.forEach(n => nSel.add(new Option(n, n)));
     const cSel = document.getElementById('filterClass');
     classes.forEach(c => cSel.add(new Option(c, c)));
     const tSel = document.getElementById('filterTier');
-    tiers.forEach(t => { if (t !== '?') tSel.add(new Option(`Tier ${t}`, t)); });
+    tiers.forEach(t => tSel.add(new Option(`Tier ${t}`, t)));
   }
 
   setupFilters() {
@@ -571,9 +604,11 @@ class Dashboard {
     coll.nations.forEach(n => nSel.add(new Option(n, n)));
     const cSel = document.getElementById('collFilterClass');
     coll.classes.forEach(c => cSel.add(new Option(c, c)));
-    const tiers = [...new Set(coll.ships.map(s => s.tier))].sort((a, b) => tierNum(a) - tierNum(b));
+    const tierSet = new Set();
+    coll.ships.forEach(s => { if (s.tier && s.tier !== '?') tierSet.add(s.tier); });
+    const tiers = [...tierSet].sort((a, b) => tierNum(a) - tierNum(b));
     const tSel = document.getElementById('collFilterTier');
-    tiers.forEach(t => { if (t !== '?') tSel.add(new Option(`Tier ${t}`, t)); });
+    tiers.forEach(t => tSel.add(new Option(`Tier ${t}`, t)));
 
     this.renderCollectionGrid();
   }

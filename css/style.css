@@ -176,13 +176,26 @@ body {
 
 /* Top 10 Ships */
 .top-ships-controls { margin-bottom: 16px; }
-.top-ships-filters {
-  display: flex; gap: 8px; margin-top: 10px;
+.top-filter-row {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
 }
-.top-ships-filters select {
-  padding: 6px 10px; background: var(--bg-mid); border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--text); font-size: 0.85em;
+.nation-icons { display: flex; gap: 4px; flex-wrap: wrap; }
+.nation-btn {
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-mid);
+  cursor: pointer; font-size: 1.1em; transition: all 0.2s; padding: 0;
 }
+.nation-btn:hover { border-color: var(--accent-dim); background: var(--bg-card-hover); }
+.nation-btn.active { border-color: var(--accent); background: rgba(0,229,255,0.1); box-shadow: 0 0 6px rgba(0,229,255,0.2); }
+.tier-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+.tier-btn {
+  min-width: 36px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-mid);
+  cursor: pointer; font-size: 0.8em; font-weight: 700; color: var(--text-dim);
+  transition: all 0.2s; padding: 0 8px;
+}
+.tier-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+.tier-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.1); }
 .top-ships-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
 .toggle-btn {
   padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--border);
