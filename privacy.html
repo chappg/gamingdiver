@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy — GamingDiver</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤿</text></svg>">
+</head>
+<body>
+  <nav class="topnav">
+    <a href="/" class="nav-logo">
+      <img src="img/logo.svg" alt="GamingDiver" class="logo-img">
+      <span>GamingDiver</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="privacy.html" class="active">Privacy</a>
+    </div>
+  </nav>
+
+  <main class="privacy-page">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: March 2026</p>
+
+    <section>
+      <h2>🔒 Your Data Never Leaves Your Browser</h2>
+      <p>GamingDiver processes <strong>everything in JavaScript, directly in your web browser</strong>. When you upload your game data export:</p>
+      <ul>
+        <li>The file is read by your browser's JavaScript engine</li>
+        <li>CSV data is parsed using <a href="https://www.papaparse.com/" target="_blank">Papa Parse</a> (client-side)</li>
+        <li>ZIP files are extracted using <a href="https://stuk.github.io/jszip/" target="_blank">JSZip</a> (client-side)</li>
+        <li>Charts are rendered using <a href="https://www.chartjs.org/" target="_blank">Chart.js</a> (client-side)</li>
+        <li><strong>No data is ever sent to any server</strong></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💾 Local Caching</h2>
+      <p>To save you from re-uploading each time, GamingDiver stores your processed results in your browser's <strong>IndexedDB</strong> (local storage). This data:</p>
+      <ul>
+        <li>Never leaves your device</li>
+        <li>Is only accessible by this website on this browser</li>
+        <li>Can be cleared at any time using the "Clear Data" button on the dashboard</li>
+        <li>Is automatically deleted if you clear your browser data</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🚫 No Tracking</h2>
+      <ul>
+        <li>No analytics scripts (no Google Analytics, no Mixpanel, nothing)</li>
+        <li>No tracking pixels</li>
+        <li>No cookies used for tracking</li>
+        <li>No user accounts or login</li>
+        <li>No advertising</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>📂 What Data is in the Export?</h2>
+      <p>Game data exports (like from Wargaming.net) may contain:</p>
+      <ul>
+        <li><strong>Game statistics</strong> — battle counts, win rates, damage dealt, ships played</li>
+        <li><strong>Session history</strong> — dates and times of play sessions, IP addresses</li>
+        <li><strong>Account info</strong> — gamertag, country code, account creation date</li>
+        <li><strong>Inventory</strong> — owned ships, flags, commanders</li>
+      </ul>
+      <p>All of this stays in your browser. We have no server-side code that could receive, store, or process this information.</p>
+    </section>
+
+    <section>
+      <h2>🔍 Verify It Yourself</h2>
+      <p>GamingDiver is <a href="https://github.com/gregch/gamingdiver" target="_blank">open source</a>. You can:</p>
+      <ul>
+        <li>Read every line of code on GitHub</li>
+        <li>Open your browser's Network tab to verify no data is transmitted</li>
+        <li>Run the site locally by cloning the repo</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🗑️ Clear Your Data</h2>
+      <p>To remove all cached data from your browser:</p>
+      <ol>
+        <li>Go to the <a href="/">dashboard</a> and click "Clear Data"</li>
+        <li>Or clear this site's data in your browser settings</li>
+      </ol>
+      <button class="btn btn-danger" onclick="clearAllData()">Clear All Cached Data Now</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>GamingDiver — Your data stays in your browser. Always.</p>
+  </footer>
+
+  <script>
+    async function clearAllData() {
+      try {
+        const dbs = await indexedDB.databases();
+        for (const db of dbs) {
+          if (db.name.startsWith('gamingdiver')) indexedDB.deleteDatabase(db.name);
+        }
+      } catch(e) {}
+      localStorage.clear();
+      alert('All cached data has been cleared.');
+    }
+  </script>
+</body>
+</html>

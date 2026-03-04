@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GamingDiver — Dive Deep Into Your Gaming Data</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤿</text></svg>">
+</head>
+<body>
+  <nav class="topnav">
+    <a href="/" class="nav-logo">
+      <img src="img/logo.svg" alt="GamingDiver" class="logo-img">
+      <span>GamingDiver</span>
+    </a>
+    <div class="nav-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="https://github.com/gregch/gamingdiver" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <!-- Landing Section -->
+  <section id="landing" class="landing">
+    <div class="hero">
+      <div class="bubbles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <h1>Dive Deep Into Your <span class="accent">Gaming Data</span></h1>
+      <p class="subtitle">Upload your game data export. Get rich insights. 100% private — everything runs in your browser.</p>
+      
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">🤿</div>
+        <p class="upload-text">Drop your data export here</p>
+        <p class="upload-hint">or click to browse — accepts .zip and .csv files</p>
+        <input type="file" id="fileInput" accept=".zip,.csv" multiple hidden>
+      </div>
+
+      <div class="upload-progress" id="uploadProgress" hidden>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="progress-text" id="progressText">Processing...</p>
+      </div>
+
+      <div class="supported-games">
+        <h3>Supported Games</h3>
+        <div class="game-cards">
+          <div class="game-card active">
+            <div class="game-icon">⚓</div>
+            <span>WoWS Legends</span>
+          </div>
+          <div class="game-card coming-soon">
+            <div class="game-icon">🎮</div>
+            <span>More coming soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard Section -->
+  <section id="dashboard" class="dashboard" hidden>
+    <div class="dash-header">
+      <h2 id="playerName">Commander Dashboard</h2>
+      <div class="dash-actions">
+        <button class="btn btn-secondary" id="btnNewUpload">New Upload</button>
+        <button class="btn btn-danger" id="btnClearData">Clear Data</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="overview">Career Overview</button>
+      <button class="tab" data-tab="ships">Ship Performance</button>
+      <button class="tab" data-tab="trends">Trends</button>
+      <button class="tab" data-tab="collection">Collection</button>
+    </div>
+
+    <!-- Career Overview Tab -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="stat-cards" id="overviewCards"></div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <h3>Battles by Mode</h3>
+          <canvas id="chartBattleModes"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Combat Style</h3>
+          <canvas id="chartCombatStyle"></canvas>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-box wide">
+          <h3>Records</h3>
+          <div id="recordsGrid" class="records-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ship Performance Tab -->
+    <div class="tab-content" id="tab-ships">
+      <div class="filters">
+        <select id="filterNation"><option value="">All Nations</option></select>
+        <select id="filterClass"><option value="">All Classes</option></select>
+        <select id="filterTier"><option value="">All Tiers</option></select>
+        <label class="min-battles-label">
+          Min battles: <input type="number" id="filterMinBattles" value="10" min="1" max="500">
+        </label>
+        <select id="filterMode"><option value="">All Modes</option></select>
+      </div>
+      <div class="table-container">
+        <table id="shipTable" class="data-table">
+          <thead>
+            <tr>
+              <th data-sort="name">Ship</th>
+              <th data-sort="nation">Nation</th>
+              <th data-sort="class">Class</th>
+              <th data-sort="tier">Tier</th>
+              <th data-sort="battles" class="num">Battles</th>
+              <th data-sort="winRate" class="num">Win %</th>
+              <th data-sort="avgDamage" class="num">Avg Dmg</th>
+              <th data-sort="kd" class="num">K/D</th>
+              <th data-sort="survival" class="num">Surv %</th>
+              <th data-sort="mainAcc" class="num">Main Acc %</th>
+              <th data-sort="torpAcc" class="num">Torp Acc %</th>
+            </tr>
+          </thead>
+          <tbody id="shipTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Trends Tab -->
+    <div class="tab-content" id="tab-trends">
+      <div class="chart-row">
+        <div class="chart-box wide">
+          <h3>Monthly Activity</h3>
+          <canvas id="chartMonthly"></canvas>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <h3>Play Schedule Heatmap</h3>
+          <div id="heatmapContainer" class="heatmap-container"></div>
+        </div>
+        <div class="chart-box">
+          <h3>Session Duration</h3>
+          <canvas id="chartSessionDuration"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collection Tab -->
+    <div class="tab-content" id="tab-collection">
+      <div class="collection-stats" id="collectionStats"></div>
+      <div class="filters">
+        <select id="collFilterNation"><option value="">All Nations</option></select>
+        <select id="collFilterClass"><option value="">All Classes</option></select>
+        <select id="collFilterTier"><option value="">All Tiers</option></select>
+        <label><input type="checkbox" id="collFilterOwned"> Owned only</label>
+      </div>
+      <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>GamingDiver — Your data stays in your browser. Always. <a href="privacy.html">Privacy Policy</a></p>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- App -->
+  <script src="js/vehicle-mapping.js"></script>
+  <script src="js/wows-analyzer.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

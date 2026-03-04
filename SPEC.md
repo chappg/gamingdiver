@@ -97,8 +97,21 @@ The .zip contains these CSVs:
 - Per-ship stats broken down by battle type
 - ~50 columns including: WINS, LOSSES, SURVIVED, FRAGS, DAMAGE_DEALT, all hit/shot counts, MAX records
 - TYPE column values: 1, 2, 3, 4, 6, 9, 10, 11, 17, 20, 23, 24, 28
-- Known mappings: 3=PvP Standard, 6=Co-op, 4=Ranked, 20=Ranked Season
-- Type 1 appears to be aggregate PvP, Type 2 aggregate Co-op
+- Known mappings (from Greg's inspection):
+  - 1 = Aggregate PvP (superset of 3)
+  - 2 = Aggregate Co-op (superset of 6)
+  - 3 = Standard (PvP)
+  - 4 = Unknown (41 battles — possibly Fleet Cup?)
+  - 6 = Versus AI (Co-op)
+  - 9 = Ranked (~1399-1428 battles)
+  - 10 = Unknown (17 battles)
+  - 11 = Unknown (12 battles)
+  - 17 = Arena
+  - 20 = Brawl
+  - 23 = Arcade
+  - 24 = Arcade (duplicate/variant of 23)
+  - 28 = War Tales
+- For display, group: Standard, Ranked, Versus AI, Brawl, Arena, Arcade, War Tales, Other
 
 ### `Player_Statistics/WOWSL_Battle_Types_Statistics.csv`
 - Aggregate stats per battle type (same columns as above)

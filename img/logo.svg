@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="ocean" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f4c75;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3282b8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#00b0ff;stop-opacity:0.6" />
+    </linearGradient>
+  </defs>
+  <!-- Helmet circle -->
+  <circle cx="100" cy="95" r="65" fill="url(#ocean)" stroke="#00e5ff" stroke-width="3"/>
+  <!-- Visor -->
+  <ellipse cx="100" cy="90" rx="42" ry="35" fill="#0a1628" stroke="#00e5ff" stroke-width="2"/>
+  <!-- Visor reflection -->
+  <ellipse cx="88" cy="82" rx="14" ry="10" fill="#00e5ff" opacity="0.15" transform="rotate(-15 88 82)"/>
+  <!-- Data bars inside visor -->
+  <rect x="72" y="85" width="8" height="20" rx="2" fill="#00e5ff" opacity="0.7"/>
+  <rect x="84" y="78" width="8" height="27" rx="2" fill="#00e5ff" opacity="0.8"/>
+  <rect x="96" y="82" width="8" height="23" rx="2" fill="#00b0ff" opacity="0.7"/>
+  <rect x="108" y="75" width="8" height="30" rx="2" fill="#00e5ff" opacity="0.9"/>
+  <rect x="120" y="88" width="8" height="17" rx="2" fill="#00b0ff" opacity="0.6"/>
+  <!-- Helmet bolts -->
+  <circle cx="55" cy="95" r="5" fill="#1b262c" stroke="#3282b8" stroke-width="1.5"/>
+  <circle cx="145" cy="95" r="5" fill="#1b262c" stroke="#3282b8" stroke-width="1.5"/>
+  <!-- Breathing apparatus -->
+  <path d="M 75 130 Q 100 150 125 130" fill="none" stroke="#3282b8" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="100" cy="145" r="8" fill="#1b262c" stroke="#3282b8" stroke-width="2"/>
+  <!-- Bubbles -->
+  <circle cx="135" cy="45" r="6" fill="none" stroke="#00e5ff" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="150" cy="30" r="4" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.4"/>
+  <circle cx="142" cy="18" r="3" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.3"/>
+  <!-- Text -->
+  <text x="100" y="185" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#bbe1fa" letter-spacing="2">GAMINGDIVER</text>
+</svg>
