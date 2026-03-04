@@ -223,17 +223,19 @@ class Dashboard {
     this.topFilterNation = '';
     this.topFilterTier = '';
 
-    // Nation icon mapping
+    // Nation icon mapping + display order
     const NATION_ICONS = {
-      'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'Germany': '🇩🇪', 'U.K.': '🇬🇧',
-      'France': '🇫🇷', 'Italy': '🇮🇹', 'U.S.S.R.': '☭', 'Europe': '🇪🇺',
-      'Pan-Asia': '🐉', 'Netherlands': '🇳🇱', 'Commonwealth': '🌏', 'Spain': '🇪🇸',
-      'Pan-America': '🌎', 'Event': '⚡',
+      'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
+      'France': '🇫🇷', 'U.S.S.R.': '☭', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
+      'Pan-Asia': '🐉', 'Commonwealth': '🌏', 'Pan-America': '🌎',
+      'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '⚡',
     };
+    const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
     // Build nation icons
     const ships = this.r.ships;
-    const nations = [...new Set(ships.map(s => s.nation))].sort();
+    const nationSet = new Set(ships.map(s => s.nation));
+    const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const nationContainer = document.getElementById('topNationIcons');
     nationContainer.innerHTML = `<button class="nation-btn active" data-nation="" title="All Nations">🌐</button>` +
       nations.map(n => `<button class="nation-btn" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '🏳️'}</button>`).join('');
