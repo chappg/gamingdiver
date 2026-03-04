@@ -74,6 +74,22 @@ class App {
       if (e.dataTransfer.files.length > 0) this.handleFiles(e.dataTransfer.files);
     });
 
+    // Example data link
+    document.getElementById('loadExample')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      this.showProgress('Loading example data...');
+      try {
+        const resp = await fetch('example-data.zip');
+        if (!resp.ok) throw new Error('Could not load example file');
+        const blob = await resp.blob();
+        const file = new File([blob], 'example-data.zip', { type: 'application/zip' });
+        await this.processFile(file);
+      } catch (err) {
+        alert('Error loading example: ' + err.message);
+        this.hideProgress();
+      }
+    });
+
     // Dashboard buttons
     document.getElementById('btnNewUpload')?.addEventListener('click', () => this.showLanding());
     document.getElementById('btnClearData')?.addEventListener('click', async () => {
@@ -93,9 +109,11 @@ class App {
 
   async handleFiles(files) {
     this.showProgress('Reading files...');
+    await this.processFile(files[0]);
+  }
 
+  async processFile(file) {
     try {
-      const file = files[0];
       if (file.name.endsWith('.zip')) {
         this.updateProgress(20, 'Extracting ZIP...');
         const isWoWS = await this.analyzer.parseZip(file);
@@ -105,13 +123,8 @@ class App {
           return;
         }
       } else {
-        // Handle individual CSV files
-        const csvFiles = [];
-        for (const f of files) {
-          const text = await f.text();
-          csvFiles.push({ name: f.name, content: text });
-        }
-        this.analyzer.parseCSVFiles(csvFiles);
+        const text = await file.text();
+        this.analyzer.parseCSVFiles([{ name: file.name, content: text }]);
       }
 
       this.updateProgress(50, 'Analyzing data...');
