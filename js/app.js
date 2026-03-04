@@ -217,8 +217,8 @@ class App {
   }
 
   async showDashboard(results) {
-    document.getElementById('landing').hidden = true;
-    document.getElementById('dashboard').hidden = false;
+    document.getElementById('landing').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
     this.hideProgress();
 
     // Clean up old charts
@@ -232,8 +232,8 @@ class App {
   }
 
   showLanding() {
-    document.getElementById('landing').hidden = false;
-    document.getElementById('dashboard').hidden = true;
+    document.getElementById('landing').classList.remove('hidden');
+    document.getElementById('dashboard').classList.add('hidden');
     if (this.dashboard) {
       Object.values(this.dashboard.charts).forEach(c => c.destroy?.());
       this.dashboard = null;

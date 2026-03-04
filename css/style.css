@@ -45,8 +45,7 @@ body {
 
 /* Landing */
 .landing { min-height: calc(100vh - 60px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; position: relative; overflow: hidden; }
-.landing[hidden] { display: none; }
-.dashboard[hidden] { display: none; }
+.landing.hidden, .dashboard.hidden { display: none !important; }
 .hero { max-width: 700px; text-align: center; position: relative; z-index: 1; }
 .hero h1 { font-size: 2.8em; margin-bottom: 16px; color: var(--text-bright); line-height: 1.2; }
 .accent { color: var(--accent); }
