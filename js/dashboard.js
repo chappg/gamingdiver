@@ -12,12 +12,13 @@ Chart.defaults.borderColor = '#1e3a5f';
 // Default battle mode: Standard (3)
 const DEFAULT_MODE = 3;
 
-// Nation display order and icons (shared across all tabs)
+// Nation display order and labels (shared across all tabs)
+// Use navy abbreviations familiar to WoWS players
 const NATION_ICONS = {
-  'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
-  'France': '🇫🇷', 'U.S.S.R.': '☭', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
-  'Pan-Asia': '🐉', 'Commonwealth': '🌏', 'Pan-America': '🌎',
-  'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '⚡',
+  'U.S.A.': 'USN', 'Japan': 'IJN', 'U.K.': 'RN', 'Germany': 'KMS',
+  'France': 'MN', 'U.S.S.R.': 'VMF', 'Italy': 'RM', 'Europe': 'EUR',
+  'Pan-Asia': 'ASIA', 'Commonwealth': 'CW', 'Pan-America': 'PAN-AM',
+  'Netherlands': 'NL', 'Spain': 'ARM', 'Event': 'EVT',
 };
 const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
@@ -247,8 +248,8 @@ class Dashboard {
     const nationSet = new Set(ships.map(s => s.nation));
     const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const nationContainer = document.getElementById('topNationIcons');
-    nationContainer.innerHTML = `<button class="nation-btn active" data-nation="" title="All Nations">🌐</button>` +
-      nations.map(n => `<button class="nation-btn" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '🏳️'}</button>`).join('');
+    nationContainer.innerHTML = `<button class="nation-btn active" data-nation="" title="All Nations">ALL</button>` +
+      nations.map(n => `<button class="nation-btn" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '?'}</button>`).join('');
 
     nationContainer.querySelectorAll('.nation-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -411,8 +412,8 @@ class Dashboard {
     const nationSet = new Set(ships.map(s => s.nation));
     const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const iconBox = document.getElementById('shipNationIcons');
-    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">🌐</span>` +
-      nations.map(n => `<span class="nation-icon" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '🏳️'}</span>`).join('');
+    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">ALL</span>` +
+      nations.map(n => `<span class="nation-icon" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '?'}</span>`).join('');
     iconBox.querySelectorAll('.nation-icon').forEach(icon => {
       icon.addEventListener('click', () => {
         iconBox.querySelectorAll('.nation-icon').forEach(i => i.classList.remove('active'));
@@ -840,8 +841,8 @@ class Dashboard {
     const nationSet = new Set(ships.map(s => s.nation));
     const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const iconBox = document.getElementById('collNationIcons');
-    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">🌐</span>` +
-      nations.map(n => `<span class="nation-icon" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '🏳️'}</span>`).join('');
+    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">ALL</span>` +
+      nations.map(n => `<span class="nation-icon" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '?'}</span>`).join('');
     iconBox.querySelectorAll('.nation-icon').forEach(icon => {
       icon.addEventListener('click', () => {
         iconBox.querySelectorAll('.nation-icon').forEach(i => i.classList.remove('active'));
