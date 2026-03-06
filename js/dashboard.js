@@ -918,28 +918,31 @@ class Dashboard {
     // Exclude Event ships from completion (temporary game mode clones)
     ships = ships.filter(s => s.nation !== 'Event');
 
-    // Mark sold ships: premium, not in garage, has battle record, not a rental
+    // Tag rentals and sold ships
     for (const s of ships) {
-      const isRental = /rental/i.test(s.name) || /rental/i.test(s.internal);
-      s.sold = s.premium && !s.inGarage && s.battles > 0 && !isRental;
+      s.isRental = /rental/i.test(s.name) || /rental/i.test(s.internal);
+      s.sold = s.premium && !s.inGarage && s.battles > 0 && !s.isRental;
       s.recoveryCost = s.sold ? (RECOVERY_COST[s.tier] || null) : null;
     }
 
-    const owned = ships.filter(s => s.inGarage).length;
-    const sold = ships.filter(s => s.sold);
+    // Exclude rentals from all completion totals
+    const nonRental = ships.filter(s => !s.isRental);
+
+    const owned = nonRental.filter(s => s.inGarage).length;
+    const sold = nonRental.filter(s => s.sold);
     const totalRecoveryCost = sold.reduce((sum, s) => sum + (s.recoveryCost || 0), 0);
-    const techTree = ships.filter(s => !s.premium);
-    const premiums = ships.filter(s => s.premium);
+    const techTree = nonRental.filter(s => !s.premium);
+    const premiums = nonRental.filter(s => s.premium);
     const completion = {
-      all: { owned, total: ships.length },
+      all: { owned, total: nonRental.length },
       techTree: { owned: techTree.filter(s => s.inGarage).length, total: techTree.length },
       premium: { owned: premiums.filter(s => s.inGarage).length, total: premiums.length },
       sold: { count: sold.length, totalCost: totalRecoveryCost },
       byNation: {},
     };
-    const nations = [...new Set(ships.map(s => s.nation))].sort();
+    const nations = [...new Set(nonRental.map(s => s.nation))].sort();
     for (const nation of nations) {
-      const nShips = ships.filter(s => s.nation === nation);
+      const nShips = nonRental.filter(s => s.nation === nation);
       const nTech = nShips.filter(s => !s.premium);
       const nPrem = nShips.filter(s => s.premium);
       completion.byNation[nation] = {
@@ -1038,6 +1041,8 @@ class Dashboard {
 
     // Owned checkbox
     document.getElementById('collFilterOwned')?.addEventListener('change', () => this.renderCollectionGrid());
+    // Show Rentals checkbox
+    document.getElementById('collFilterRentals')?.addEventListener('change', () => this.renderCollectionGrid());
   }
 
   renderCollectionGrid() {
@@ -1046,8 +1051,10 @@ class Dashboard {
     const tier = this.collFilterTier || '';
     const type = this.collFilterType || '';
     const ownedOnly = document.getElementById('collFilterOwned').checked;
+    const showRentals = document.getElementById('collFilterRentals')?.checked || false;
 
     let ships = this.r.collection.ships;
+    if (!showRentals) ships = ships.filter(s => !s.isRental);
     if (nation) ships = ships.filter(s => s.nation === nation);
     if (cls) ships = ships.filter(s => s.class === cls);
     if (tier) ships = ships.filter(s => s.tier === tier);
