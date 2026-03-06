@@ -187,13 +187,13 @@ body {
 .class-buttons { display: flex; gap: 4px; }
 .ship-filter-row, .coll-filter-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .nation-icons { display: flex; gap: 4px; flex-wrap: wrap; }
-.nation-btn {
-  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+.nation-btn, .nation-icon {
+  min-width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
   border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-mid);
-  cursor: pointer; font-size: 1.1em; transition: all 0.2s; padding: 0;
+  cursor: pointer; font-size: 1.1em; transition: all 0.2s; padding: 0 4px;
 }
-.nation-btn:hover { border-color: var(--accent-dim); background: var(--bg-card-hover); }
-.nation-btn.active { border-color: var(--accent); background: rgba(0,229,255,0.1); box-shadow: 0 0 6px rgba(0,229,255,0.2); }
+.nation-btn:hover, .nation-icon:hover { border-color: var(--accent-dim); background: var(--bg-card-hover); }
+.nation-btn.active, .nation-icon.active { border-color: var(--accent); background: rgba(0,229,255,0.1); box-shadow: 0 0 6px rgba(0,229,255,0.2); }
 .tier-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
 .tier-btn {
   min-width: 36px; height: 30px; display: flex; align-items: center; justify-content: center;
