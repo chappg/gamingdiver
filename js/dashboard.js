@@ -900,7 +900,7 @@ class Dashboard {
     if (typeof VEHICLE_MAP !== 'undefined') {
       const known = new Set(ships.map(s => s.internal));
       for (const [internal, info] of Object.entries(VEHICLE_MAP)) {
-        if (!known.has(internal)) {
+        if (!known.has(internal) && info.nation !== 'Event') {
           ships.push({
             internal, ...info,
             inGarage: false, battles: 0, lastBattle: null, distance: 0, exp: 0,
@@ -908,6 +908,9 @@ class Dashboard {
         }
       }
     }
+
+    // Exclude Event ships from completion (temporary game mode clones)
+    ships = ships.filter(s => s.nation !== 'Event');
 
     const owned = ships.filter(s => s.inGarage).length;
     const techTree = ships.filter(s => !s.premium);

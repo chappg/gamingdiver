@@ -344,11 +344,12 @@ class WoWSAnalyzer {
       };
     }
 
-    // Start with ALL ships from VEHICLE_MAP
+    // Start with ALL ships from VEHICLE_MAP (excluding Event ships — temporary game mode clones)
     const ships = [];
     const seen = new Set();
     if (typeof VEHICLE_MAP !== 'undefined') {
       for (const [internal, info] of Object.entries(VEHICLE_MAP)) {
+        if (info.nation === 'Event') continue;
         seen.add(internal);
         const ud = userData[internal] || {};
         ships.push({
