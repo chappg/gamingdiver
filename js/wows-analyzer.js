@@ -331,19 +331,52 @@ class WoWSAnalyzer {
 
   analyzeCollection() {
     const shipStats = this.data['WOWSL_Ship_Statistics'] || [];
-    const ships = [];
 
+    // Build lookup of user's ship data keyed by internal name
+    const userData = {};
     for (const row of shipStats) {
-      const info = resolveVehicle(row.VEHICLE_NAME);
-      ships.push({
-        internal: row.VEHICLE_NAME,
-        ...info,
+      userData[row.VEHICLE_NAME] = {
         inGarage: row.IN_GARAGE === '1',
         battles: parseInt(row.BATTLES_COUNT) || 0,
         lastBattle: row.LAST_BATTLE_TIME,
         distance: parseInt(row.DISTANCE) || 0,
         exp: parseInt(row.CURRENT_EXP) || 0,
-      });
+      };
+    }
+
+    // Start with ALL ships from VEHICLE_MAP
+    const ships = [];
+    const seen = new Set();
+    if (typeof VEHICLE_MAP !== 'undefined') {
+      for (const [internal, info] of Object.entries(VEHICLE_MAP)) {
+        seen.add(internal);
+        const ud = userData[internal] || {};
+        ships.push({
+          internal,
+          ...info,
+          inGarage: ud.inGarage || false,
+          battles: ud.battles || 0,
+          lastBattle: ud.lastBattle || null,
+          distance: ud.distance || 0,
+          exp: ud.exp || 0,
+        });
+      }
+    }
+
+    // Add any user ships not in VEHICLE_MAP (renamed/new ships)
+    for (const row of shipStats) {
+      if (!seen.has(row.VEHICLE_NAME)) {
+        const info = resolveVehicle(row.VEHICLE_NAME);
+        ships.push({
+          internal: row.VEHICLE_NAME,
+          ...info,
+          inGarage: row.IN_GARAGE === '1',
+          battles: parseInt(row.BATTLES_COUNT) || 0,
+          lastBattle: row.LAST_BATTLE_TIME,
+          distance: parseInt(row.DISTANCE) || 0,
+          exp: parseInt(row.CURRENT_EXP) || 0,
+        });
+      }
     }
 
     ships.sort((a, b) => tierNum(b.tier) - tierNum(a.tier) || a.name.localeCompare(b.name));
@@ -353,7 +386,27 @@ class WoWSAnalyzer {
     const nations = new Set(ships.map(s => s.nation));
     const classes = new Set(ships.map(s => s.class));
 
-    return { ships, owned, played, total: ships.length, nations: [...nations].sort(), classes: [...classes].sort() };
+    // Completion stats
+    const techTree = ships.filter(s => !s.premium);
+    const premiums = ships.filter(s => s.premium);
+    const completion = {
+      all: { owned, total: ships.length },
+      techTree: { owned: techTree.filter(s => s.inGarage).length, total: techTree.length },
+      premium: { owned: premiums.filter(s => s.inGarage).length, total: premiums.length },
+      byNation: {},
+    };
+    for (const nation of [...nations].sort()) {
+      const nShips = ships.filter(s => s.nation === nation);
+      const nTech = nShips.filter(s => !s.premium);
+      const nPrem = nShips.filter(s => s.premium);
+      completion.byNation[nation] = {
+        all: { owned: nShips.filter(s => s.inGarage).length, total: nShips.length },
+        techTree: { owned: nTech.filter(s => s.inGarage).length, total: nTech.length },
+        premium: { owned: nPrem.filter(s => s.inGarage).length, total: nPrem.length },
+      };
+    }
+
+    return { ships, owned, played, total: ships.length, nations: [...nations].sort(), classes: [...classes].sort(), completion };
   }
 
   analyzeRecords() {

@@ -897,14 +897,39 @@ class Dashboard {
   // ---- COLLECTION TAB ----
   renderCollection() {
     const coll = this.r.collection;
+    const c = coll.completion;
+    const pct = (o, t) => t > 0 ? Math.round(o / t * 100) : 0;
 
     const statsEl = document.getElementById('collectionStats');
     statsEl.innerHTML = [
-      `<div class="collection-stat"><span class="cs-num">${coll.owned}</span><span class="cs-label">Ships Owned</span></div>`,
+      `<div class="collection-stat"><span class="cs-num">${pct(c.all.owned, c.all.total)}%</span><span class="cs-label">Complete (${c.all.owned}/${c.all.total})</span></div>`,
+      `<div class="collection-stat"><span class="cs-num">${pct(c.techTree.owned, c.techTree.total)}%</span><span class="cs-label">Tech Tree (${c.techTree.owned}/${c.techTree.total})</span></div>`,
+      `<div class="collection-stat"><span class="cs-num">${pct(c.premium.owned, c.premium.total)}%</span><span class="cs-label">Premium (${c.premium.owned}/${c.premium.total})</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${coll.played}</span><span class="cs-label">Ships Played</span></div>`,
-      `<div class="collection-stat"><span class="cs-num">${coll.total}</span><span class="cs-label">Total Ships</span></div>`,
-      `<div class="collection-stat"><span class="cs-num">${coll.nations.length}</span><span class="cs-label">Nations</span></div>`,
     ].join('');
+
+    // Per-nation completion bars
+    const nationEl = document.getElementById('collectionNationCompletion');
+    if (nationEl) nationEl.remove();
+    const nationDiv = document.createElement('div');
+    nationDiv.id = 'collectionNationCompletion';
+    nationDiv.className = 'nation-completion';
+    const nationRows = NATION_ORDER.filter(n => c.byNation[n]).map(n => {
+      const nd = c.byNation[n];
+      const allPct = pct(nd.all.owned, nd.all.total);
+      const techPct = pct(nd.techTree.owned, nd.techTree.total);
+      const premPct = pct(nd.premium.owned, nd.premium.total);
+      const full = allPct === 100 ? ' full' : '';
+      return `<div class="nc-row${full}">
+        <span class="nc-flag">${NATION_ICONS[n] || '?'}</span>
+        <span class="nc-name">${n}</span>
+        <span class="nc-bar-wrap"><span class="nc-bar" style="width:${allPct}%"></span></span>
+        <span class="nc-pct">${allPct}%</span>
+        <span class="nc-detail">TT ${nd.techTree.owned}/${nd.techTree.total} · P ${nd.premium.owned}/${nd.premium.total}</span>
+      </div>`;
+    });
+    nationDiv.innerHTML = `<h3>Completion by Nation</h3>` + nationRows.join('');
+    statsEl.parentNode.insertBefore(nationDiv, statsEl.nextSibling);
 
     this.populateCollectionFilters();
     this.renderCollectionGrid();
@@ -987,6 +1012,19 @@ class Dashboard {
     if (type === 'tech') ships = ships.filter(s => !s.premium);
     if (type === 'premium') ships = ships.filter(s => s.premium);
     if (ownedOnly) ships = ships.filter(s => s.inGarage);
+
+    // Show filtered completion summary
+    const ownedCount = ships.filter(s => s.inGarage).length;
+    const totalCount = ships.length;
+    const filtPct = totalCount > 0 ? Math.round(ownedCount / totalCount * 100) : 0;
+    let filterSummary = document.getElementById('collFilterSummary');
+    if (!filterSummary) {
+      filterSummary = document.createElement('div');
+      filterSummary.id = 'collFilterSummary';
+      filterSummary.className = 'coll-filter-summary';
+      document.getElementById('collectionGrid').parentNode.insertBefore(filterSummary, document.getElementById('collectionGrid'));
+    }
+    filterSummary.innerHTML = `<strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned`;
 
     const grid = document.getElementById('collectionGrid');
     grid.innerHTML = ships.map(s => `

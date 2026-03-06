@@ -386,3 +386,19 @@ footer a { color: var(--accent-dim); }
 .nation-btn .fi, .nation-icon .fi { font-size: 1.2em; }
 .fi { vertical-align: middle; }
 .flag-img { height: 1em; width: auto; vertical-align: middle; border-radius: 2px; }
+
+/* Nation completion bars */
+.nation-completion { background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+.nation-completion h3 { margin: 0 0 14px; color: var(--text-bright); font-size: 1em; }
+.nc-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 0.85em; }
+.nc-row.full .nc-pct { color: var(--green); font-weight: 600; }
+.nc-flag { width: 24px; text-align: center; flex-shrink: 0; }
+.nc-name { width: 110px; flex-shrink: 0; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nc-bar-wrap { flex: 1; height: 10px; background: var(--bg-deep); border-radius: 5px; overflow: hidden; min-width: 80px; }
+.nc-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 5px; transition: width 0.3s; }
+.nc-pct { width: 40px; text-align: right; flex-shrink: 0; color: var(--text-dim); }
+.nc-detail { width: 120px; flex-shrink: 0; text-align: right; color: var(--text-dim); font-size: 0.9em; }
+
+/* Filter completion summary */
+.coll-filter-summary { background: var(--bg-card); border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; border: 1px solid var(--border); color: var(--text-dim); font-size: 0.9em; }
+.coll-filter-summary strong { color: var(--text-bright); }
