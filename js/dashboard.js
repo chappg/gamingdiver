@@ -17,13 +17,15 @@ const DEFAULT_MODE = 'standard_all';
 // Flag icons via flag-icons CSS (works in all browsers, no emoji dependency)
 const NATION_FLAGS = {
   'U.S.A.': 'us', 'Japan': 'jp', 'U.K.': 'gb', 'Germany': 'de',
-  'France': 'fr', 'U.S.S.R.': 'ru', 'Italy': 'it', 'Europe': 'eu',
+  'France': 'fr', 'U.S.S.R.': null, 'Italy': 'it', 'Europe': 'eu',
   'Pan-Asia': 'cn', 'Commonwealth': 'au', 'Pan-America': 'br',
   'Netherlands': 'nl', 'Spain': 'es', 'Event': null,
 };
 function flagIcon(nation) {
+  if (nation === 'U.S.S.R.') return `<img src="img/flags/ussr.svg" alt="USSR" class="flag-img" title="U.S.S.R.">`;
+  if (nation === 'Event') return '🎪';
   const code = NATION_FLAGS[nation];
-  if (!code) return nation === 'Event' ? '🎪' : '?';
+  if (!code) return '?';
   return `<span class="fi fi-${code}" title="${nation}"></span>`;
 }
 // Legacy compat — used in templates that expect a string

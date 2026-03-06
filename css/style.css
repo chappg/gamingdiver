@@ -385,3 +385,4 @@ footer a { color: var(--accent-dim); }
 /* Flag icons sizing */
 .nation-btn .fi, .nation-icon .fi { font-size: 1.2em; }
 .fi { vertical-align: middle; }
+.flag-img { height: 1em; width: auto; vertical-align: middle; border-radius: 2px; }
