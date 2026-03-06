@@ -299,7 +299,7 @@ class Dashboard {
     const nationSet = new Set(ships.map(s => s.nation));
     const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const nationContainer = document.getElementById('topNationIcons');
-    nationContainer.innerHTML = `<button class="nation-btn active" data-nation="" title="All Nations">ALL</button>` +
+    nationContainer.innerHTML = `<button class="nation-btn active" data-nation="" title="All Nations">All</button>` +
       nations.map(n => `<button class="nation-btn" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '?'}</button>`).join('');
 
     nationContainer.querySelectorAll('.nation-btn').forEach(btn => {
@@ -480,7 +480,7 @@ class Dashboard {
     const nationSet = new Set(ships.map(s => s.nation));
     const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const iconBox = document.getElementById('shipNationIcons');
-    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">ALL</span>` +
+    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">All</span>` +
       nations.map(n => `<span class="nation-icon" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '?'}</span>`).join('');
     iconBox.querySelectorAll('.nation-icon').forEach(icon => {
       icon.addEventListener('click', () => {
@@ -989,7 +989,7 @@ class Dashboard {
     const nationSet = new Set(ships.map(s => s.nation));
     const nations = NATION_ORDER.filter(n => nationSet.has(n));
     const iconBox = document.getElementById('collNationIcons');
-    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">ALL</span>` +
+    iconBox.innerHTML = `<span class="nation-icon active" data-nation="" title="All Nations">All</span>` +
       nations.map(n => `<span class="nation-icon" data-nation="${n}" title="${n}">${NATION_ICONS[n] || '?'}</span>`).join('');
     iconBox.querySelectorAll('.nation-icon').forEach(icon => {
       icon.addEventListener('click', () => {
