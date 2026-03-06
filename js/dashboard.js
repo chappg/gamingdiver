@@ -895,9 +895,47 @@ class Dashboard {
   }
 
   // ---- COLLECTION TAB ----
+  computeCompletion(ships) {
+    // Merge VEHICLE_MAP ships into the collection if not already present
+    if (typeof VEHICLE_MAP !== 'undefined') {
+      const known = new Set(ships.map(s => s.internal));
+      for (const [internal, info] of Object.entries(VEHICLE_MAP)) {
+        if (!known.has(internal)) {
+          ships.push({
+            internal, ...info,
+            inGarage: false, battles: 0, lastBattle: null, distance: 0, exp: 0,
+          });
+        }
+      }
+    }
+
+    const owned = ships.filter(s => s.inGarage).length;
+    const techTree = ships.filter(s => !s.premium);
+    const premiums = ships.filter(s => s.premium);
+    const completion = {
+      all: { owned, total: ships.length },
+      techTree: { owned: techTree.filter(s => s.inGarage).length, total: techTree.length },
+      premium: { owned: premiums.filter(s => s.inGarage).length, total: premiums.length },
+      byNation: {},
+    };
+    const nations = [...new Set(ships.map(s => s.nation))].sort();
+    for (const nation of nations) {
+      const nShips = ships.filter(s => s.nation === nation);
+      const nTech = nShips.filter(s => !s.premium);
+      const nPrem = nShips.filter(s => s.premium);
+      completion.byNation[nation] = {
+        all: { owned: nShips.filter(s => s.inGarage).length, total: nShips.length },
+        techTree: { owned: nTech.filter(s => s.inGarage).length, total: nTech.length },
+        premium: { owned: nPrem.filter(s => s.inGarage).length, total: nPrem.length },
+      };
+    }
+    return completion;
+  }
+
   renderCollection() {
     const coll = this.r.collection;
-    const c = coll.completion;
+    // Recompute completion from ships array (handles old cached data without completion field)
+    const c = this.computeCompletion(coll.ships);
     const pct = (o, t) => t > 0 ? Math.round(o / t * 100) : 0;
 
     const statsEl = document.getElementById('collectionStats');
