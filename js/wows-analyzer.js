@@ -346,7 +346,7 @@ class WoWSAnalyzer {
 
     // Build name→SLUG lookup for merging export data into SLUG-only entries
     // Use normalized key (lowercase, trimmed) for fuzzy matching
-    const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const slugByNorm = {};
     if (typeof VEHICLE_MAP !== 'undefined') {
       for (const [key, info] of Object.entries(VEHICLE_MAP)) {
