@@ -367,6 +367,7 @@ class WoWSAnalyzer {
     // Add any user ships not in VEHICLE_MAP (renamed/new ships)
     for (const row of shipStats) {
       if (!seen.has(row.VEHICLE_NAME)) {
+        console.warn('[GamingDiver] Ship in export but not in vehicle mapping:', row.VEHICLE_NAME);
         const info = resolveVehicle(row.VEHICLE_NAME);
         ships.push({
           internal: row.VEHICLE_NAME,
