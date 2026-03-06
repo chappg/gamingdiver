@@ -413,6 +413,8 @@ class WoWSAnalyzer {
     const unmatchedExport = [];
     for (const row of shipStats) {
       if (!seen.has(row.VEHICLE_NAME)) {
+        // Skip Event ships (PX prefix) — they're intentionally excluded from Collection
+        if (/^PX/.test(row.VEHICLE_NAME)) { seen.add(row.VEHICLE_NAME); continue; }
         unmatchedExport.push(row.VEHICLE_NAME);
         console.warn('[GamingDiver] Ship in export but not in vehicle mapping:', row.VEHICLE_NAME);
         const info = resolveVehicle(row.VEHICLE_NAME);
