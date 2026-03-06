@@ -402,17 +402,20 @@ class WoWSAnalyzer {
       console.log('[GamingDiver] Merged export data into SLUG entries by name:', [...slugsMerged]);
     }
 
-    // Debug: check both tables for Tenryū/Shi An
+    // Debug: log table info and search for missing ships
     const byType = this.data['WOWSL_Ship_Statistics_By_Type'] || [];
-    console.log('[GamingDiver] DEBUG Ship_Statistics rows:', shipStats.length, 'Ship_Statistics_By_Type rows:', byType.length);
-    for (const row of byType) {
-      if (/tenr|shi.an|PJSC014|PJSC004|PZSC101/i.test(row.VEHICLE_NAME)) {
-        console.log('[GamingDiver] DEBUG By_Type:', row.VEHICLE_NAME, 'type:', row.BATTLE_TYPE, 'battles:', row.BATTLES_COUNT);
+    console.log('[GamingDiver] DEBUG Ship_Statistics rows:', shipStats.length, 'By_Type rows:', byType.length);
+    if (byType.length > 0) console.log('[GamingDiver] DEBUG By_Type columns:', Object.keys(byType[0]));
+    if (shipStats.length > 0) console.log('[GamingDiver] DEBUG Ship_Stats columns:', Object.keys(shipStats[0]));
+    // Search ALL Pan-Asia (PZ) entries in both tables
+    for (const row of shipStats) {
+      if (/^PZ/i.test(row.VEHICLE_NAME)) {
+        console.log('[GamingDiver] DEBUG PZ Ship_Stats:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
       }
     }
-    for (const row of shipStats) {
-      if (/tenr|shi.an|PJSC014|PJSC004|PZSC101/i.test(row.VEHICLE_NAME)) {
-        console.log('[GamingDiver] DEBUG Ship_Stats:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
+    for (const row of byType) {
+      if (/tenr/i.test(row.VEHICLE_NAME)) {
+        console.log('[GamingDiver] DEBUG Tenryu By_Type:', row.VEHICLE_NAME, JSON.stringify(row));
       }
     }
 
