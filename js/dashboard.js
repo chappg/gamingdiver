@@ -16,7 +16,7 @@ const DEFAULT_MODE = 3;
 // Use navy abbreviations familiar to WoWS players
 const NATION_ICONS = {
   'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
-  'France': '🇫🇷', 'U.S.S.R.': '🚩', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
+  'France': '🇫🇷', 'U.S.S.R.': '🇷🇺', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
   'Pan-Asia': '🌏', 'Commonwealth': '🌐', 'Pan-America': '🌎',
   'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '🎪',
 };
