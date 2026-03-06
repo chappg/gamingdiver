@@ -1,8 +1,9 @@
 #!/bin/bash
 # Auto-bump cache version in index.html when JS/CSS files change
 if git diff --cached --name-only | grep -qE '\.(js|css)$'; then
-  CURRENT=$(grep -oP 'style\.css\?v=\K\d+' index.html 2>/dev/null || echo "0")
+  CURRENT=$(grep -oE 'style\.css\?v=[0-9]+' index.html | head -1 | grep -oE '[0-9]+$')
+  if [ -z "$CURRENT" ]; then CURRENT=100; fi
   NEXT=$((CURRENT + 1))
-  sed -i '' "s/\.css?v=[0-9]*/\.css?v=$NEXT/g; s/\.js?v=[0-9]*/\.js?v=$NEXT/g" index.html
+  sed -i '' "s/\.css?v=[0-9][0-9]*/\.css?v=$NEXT/g; s/\.js?v=[0-9][0-9]*/\.js?v=$NEXT/g" index.html
   git add index.html
 fi
