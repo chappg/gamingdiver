@@ -407,3 +407,7 @@ footer a { color: var(--accent-dim); }
 /* Filter completion summary */
 .coll-filter-summary { background: var(--bg-card); border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; border: 1px solid var(--border); color: var(--text-dim); font-size: 0.9em; }
 .coll-filter-summary strong { color: var(--text-bright); }
+.coll-summary-row { display: flex; align-items: center; gap: 12px; }
+.coll-summary-bar-wrap { width: 120px; height: 10px; background: var(--bg-deep); border-radius: 5px; overflow: hidden; flex-shrink: 0; }
+.coll-summary-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 5px; transition: width 0.3s; }
+.coll-summary-text { flex: 1; }

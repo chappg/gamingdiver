@@ -969,28 +969,9 @@ class Dashboard {
       soldStats,
     ].join('');
 
-    // Per-nation completion bars
+    // Remove legacy nation completion section if present
     const nationEl = document.getElementById('collectionNationCompletion');
     if (nationEl) nationEl.remove();
-    const nationDiv = document.createElement('div');
-    nationDiv.id = 'collectionNationCompletion';
-    nationDiv.className = 'nation-completion';
-    const nationRows = NATION_ORDER.filter(n => c.byNation[n]).map(n => {
-      const nd = c.byNation[n];
-      const allPct = pct(nd.all.owned, nd.all.total);
-      const techPct = pct(nd.techTree.owned, nd.techTree.total);
-      const premPct = pct(nd.premium.owned, nd.premium.total);
-      const full = allPct === 100 ? ' full' : '';
-      return `<div class="nc-row${full}">
-        <span class="nc-flag">${NATION_ICONS[n] || '?'}</span>
-        <span class="nc-name">${n}</span>
-        <span class="nc-bar-wrap"><span class="nc-bar" style="width:${allPct}%"></span></span>
-        <span class="nc-pct">${allPct}%</span>
-        <span class="nc-detail">TT ${nd.techTree.owned}/${nd.techTree.total} · P ${nd.premium.owned}/${nd.premium.total}</span>
-      </div>`;
-    });
-    nationDiv.innerHTML = `<h3>Completion by Nation</h3>` + nationRows.join('');
-    statsEl.parentNode.insertBefore(nationDiv, statsEl.nextSibling);
 
     this.populateCollectionFilters();
     this.renderCollectionGrid();
@@ -1093,7 +1074,13 @@ class Dashboard {
     const soldTotal = type === 'sold'
       ? ` — 🪙 ${fmt(ships.reduce((sum, s) => sum + (s.recoveryCost || 0), 0))} total recovery cost`
       : '';
-    filterSummary.innerHTML = `<strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned${soldSuffix}${soldTotal}`;
+    filterSummary.innerHTML = `
+      <div class="coll-summary-row">
+        <span class="coll-summary-bar-wrap">
+          <span class="coll-summary-bar" style="width:${filtPct}%"></span>
+        </span>
+        <span class="coll-summary-text"><strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned${soldSuffix}${soldTotal}</span>
+      </div>`;
 
     const grid = document.getElementById('collectionGrid');
     grid.innerHTML = ships.map(s => {
