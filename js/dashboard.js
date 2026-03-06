@@ -918,9 +918,10 @@ class Dashboard {
     // Exclude Event ships from completion (temporary game mode clones)
     ships = ships.filter(s => s.nation !== 'Event');
 
-    // Mark sold ships: premium, not in garage, but has battle record
+    // Mark sold ships: premium, not in garage, has battle record, not a rental
     for (const s of ships) {
-      s.sold = s.premium && !s.inGarage && s.battles > 0;
+      const isRental = /rental/i.test(s.name) || /rental/i.test(s.internal);
+      s.sold = s.premium && !s.inGarage && s.battles > 0 && !isRental;
       s.recoveryCost = s.sold ? (RECOVERY_COST[s.tier] || null) : null;
     }
 
