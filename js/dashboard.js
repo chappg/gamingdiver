@@ -309,7 +309,8 @@ class Dashboard {
 
   renderTopShips() {
     const metric = this.currentTopMetric || 'battles';
-    const minBattles = 10;
+    const totalBattles = this.r.career.modeStats['all']?.battles || 0;
+    const minBattles = totalBattles < 1000 ? 1 : 10;
     const mode = this.currentOverviewMode;
     const filterNation = this.topFilterNation || '';
     const filterTier = this.topFilterTier || '';
@@ -475,8 +476,13 @@ class Dashboard {
       });
     });
 
-    // Min battles
-    document.getElementById('filterMinBattles')?.addEventListener('change', () => this.renderShipTable());
+    // Min battles — lower default for players with <1000 games
+    const minBattlesInput = document.getElementById('filterMinBattles');
+    if (minBattlesInput) {
+      const totalBattles = this.r.career.modeStats['all']?.battles || 0;
+      if (totalBattles < 1000) minBattlesInput.value = '1';
+      minBattlesInput.addEventListener('change', () => this.renderShipTable());
+    }
   }
 
   setupFilters() {
