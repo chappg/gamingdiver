@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>GamingDiver Logo Candidates</title>
+<style>
+body { margin: 0; padding: 20px; background: #0a1628; color: #bbe1fa; font-family: system-ui; }
+h1 { text-align: center; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1400px; margin: 20px auto; }
+.card { background: #0f2744; border-radius: 12px; padding: 16px; text-align: center; }
+.card img { width: 100%; border-radius: 8px; cursor: pointer; }
+.card img:hover { transform: scale(1.02); transition: 0.2s; }
+.card .label { margin-top: 8px; font-size: 14px; color: #5a8aaa; }
+.card .num { font-size: 24px; font-weight: bold; color: #00e5ff; }
+.preview { display: flex; gap: 20px; justify-content: center; margin: 30px auto; max-width: 1000px; flex-wrap: wrap; }
+.preview div { text-align: center; }
+.preview img { border-radius: 8px; }
+</style></head><body>
+<h1>🤿 GamingDiver Logo Candidates</h1>
+<p style="text-align:center;color:#5a8aaa">Click any logo to see it full size. Tell Greg which number(s) you like!</p>
+
+<h2 style="text-align:center;color:#c9a227">Set A: Classic Brass Helmet + Data Bars</h2>
+<div class="grid" id="setA"></div>
+
+<h2 style="text-align:center;color:#c9a227">Set B: Minimalist Flat Icon</h2>
+<div class="grid" id="setB"></div>
+
+<h2 style="text-align:center;color:#c9a227">Set C: Mascot Character</h2>
+<div class="grid" id="setC"></div>
+
+<script>
+const files = [
+  // Set A - classic helmet
+  '001-logo-design-for-gamingdiver-a-gaming-sta.png',
+  '002-logo-design-for-gamingdiver-a-gaming-sta.png',
+  '003-logo-design-for-gamingdiver-a-gaming-sta.png',
+  '004-logo-design-for-gamingdiver-a-gaming-sta.png',
+  // Set B - minimalist flat
+  '005-minimalist-flat-logo-icon-vintage-deep-s.png',
+  '006-minimalist-flat-logo-icon-vintage-deep-s.png',
+  '007-minimalist-flat-logo-icon-vintage-deep-s.png',
+  '008-minimalist-flat-logo-icon-vintage-deep-s.png',
+  // Set C - mascot
+  '009-gaming-mascot-logo-a-cute-but-cool-deep-.png',
+  '010-gaming-mascot-logo-a-cute-but-cool-deep-.png',
+  '011-gaming-mascot-logo-a-cute-but-cool-deep-.png',
+];
+const sets = {setA: files.slice(0,4), setB: files.slice(4,8), setC: files.slice(8)};
+for (const [id, list] of Object.entries(sets)) {
+  const el = document.getElementById(id);
+  list.forEach((f, i) => {
+    const globalIdx = files.indexOf(f) + 1;
+    el.innerHTML += `<div class="card"><div class="num">#${globalIdx}</div><a href="${f}" target="_blank"><img src="${f}"></a><div class="label">${f.replace(/^\d+-/,'').replace(/.png$/,'').substring(0,40)}</div></div>`;
+  });
+}
+</script></body></html>

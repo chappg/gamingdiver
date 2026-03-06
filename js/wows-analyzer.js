@@ -3,8 +3,8 @@
 const BATTLE_TYPES = {
   1: { name: 'PvP (All)', group: 'pvp', aggregate: true },
   2: { name: 'Co-op (All)', group: 'coop', aggregate: true },
-  3: { name: 'Standard', group: 'pvp' },
-  4: { name: 'Division', group: 'pvp' },
+  3: { name: 'Standard (Solo)', group: 'pvp' },
+  4: { name: 'Standard (Division)', group: 'pvp' },
   6: { name: 'Versus AI', group: 'coop' },
   9: { name: 'Ranked', group: 'competitive' },
   10: { name: 'Unknown (10)', group: 'other' },
@@ -16,7 +16,12 @@ const BATTLE_TYPES = {
   28: { name: 'War Tales', group: 'other' },
 };
 
-const DISPLAY_BATTLE_TYPES = [3, 6, 9, 17, 20, 4, 23, 28, 10, 11, 24];
+// Synthetic aggregate: Standard = type 3 (solo) + type 4 (division)
+const SYNTHETIC_TYPES = {
+  'standard_all': { name: 'Standard', sources: [3, 4], group: 'pvp' },
+};
+
+const DISPLAY_BATTLE_TYPES = ['standard_all', 3, 4, 6, 9, 17, 20, 23, 28, 10, 11, 24];
 
 const TIER_ORDER = { 'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, '★': 9, '?': 0 };
 function tierNum(t) { return TIER_ORDER[t] || 0; }
@@ -113,6 +118,32 @@ class WoWSAnalyzer {
         mainAccuracy: shotsMain > 0 ? (hitsMain / shotsMain * 100) : 0,
         torpAccuracy: shotsTorp > 0 ? (hitsTorp / shotsTorp * 100) : 0,
       };
+    }
+
+    // Build synthetic aggregates (e.g., Standard = Solo + Division)
+    for (const [key, def] of Object.entries(SYNTHETIC_TYPES)) {
+      let battles = 0, wins = 0, losses = 0, frags = 0, damage = 0, survived = 0;
+      let planesKilled = 0, shotsMain = 0, hitsMain = 0, shotsTorp = 0, hitsTorp = 0;
+      for (const srcType of def.sources) {
+        const s = modeStats[srcType];
+        if (!s) continue;
+        battles += s.battles; wins += s.wins; losses += (s.losses || 0); frags += s.frags;
+        damage += s.damage; survived += s.survived; planesKilled += (s.planesKilled || 0);
+        shotsMain += s.shotsMain; hitsMain += s.hitsMain; shotsTorp += s.shotsTorp; hitsTorp += s.hitsTorp;
+      }
+      if (battles > 0) {
+        const deaths = battles - survived;
+        modeStats[key] = {
+          name: def.name, battles, wins, losses, survived, frags, damage, planesKilled,
+          shotsMain, hitsMain, shotsTorp, hitsTorp,
+          winRate: (wins / battles * 100),
+          avgDamage: Math.round(damage / battles),
+          kd: deaths > 0 ? (frags / deaths) : frags,
+          survivalRate: (survived / battles * 100),
+          mainAccuracy: shotsMain > 0 ? (hitsMain / shotsMain * 100) : 0,
+          torpAccuracy: shotsTorp > 0 ? (hitsTorp / shotsTorp * 100) : 0,
+        };
+      }
     }
 
     // Compute "all modes" totals

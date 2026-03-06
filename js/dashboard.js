@@ -9,8 +9,8 @@ const CHART_COLORS = {
 Chart.defaults.color = '#8899aa';
 Chart.defaults.borderColor = '#1e3a5f';
 
-// Default battle mode: Standard (3)
-const DEFAULT_MODE = 3;
+// Default battle mode: Standard (all = solo + division)
+const DEFAULT_MODE = 'standard_all';
 
 // Nation display order and labels (shared across all tabs)
 // Use navy abbreviations familiar to WoWS players
@@ -77,22 +77,28 @@ class Dashboard {
     if (!container) return;
     const modeStats = this.r.career.modeStats;
     
-    // Build tabs: Standard first, then other non-aggregate modes that have data, then "All Modes"
-    const modeOrder = [3, 9, 6, 17, 20, 4, 23, 28, 'all'];
+    // Build tabs: Standard (All) first, then Solo/Division, then other modes, then "All Modes"
+    const modeOrder = ['standard_all', 3, 4, 9, 6, 17, 20, 23, 28, 'all'];
     const tabs = modeOrder.filter(m => modeStats[m] && modeStats[m].battles > 0);
     
+    const modeName = (m) => {
+      if (m === 'all') return 'All Modes';
+      if (typeof m === 'string' && SYNTHETIC_TYPES[m]) return SYNTHETIC_TYPES[m].name;
+      return BATTLE_TYPES[m]?.name || `Type ${m}`;
+    };
+
     container.innerHTML = tabs.map(m => {
       const ms = modeStats[m];
-      const name = m === 'all' ? 'All Modes' : (BATTLE_TYPES[m]?.name || `Type ${m}`);
       const active = (m == currentMode) ? 'active' : '';
-      return `<button class="mode-tab ${active}" data-mode="${m}">${name} <span class="mode-count">(${fmt(ms.battles)})</span></button>`;
+      return `<button class="mode-tab ${active}" data-mode="${m}">${modeName(m)} <span class="mode-count">(${fmt(ms.battles)})</span></button>`;
     }).join('');
 
     container.querySelectorAll('.mode-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         container.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const mode = btn.dataset.mode === 'all' ? 'all' : parseInt(btn.dataset.mode);
+        const raw = btn.dataset.mode;
+        const mode = (raw === 'all' || isNaN(raw)) ? raw : parseInt(raw);
         onChange(mode);
       });
     });
@@ -144,7 +150,7 @@ class Dashboard {
 
   renderBattleModesChart(modeStats) {
     const entries = Object.entries(modeStats)
-      .filter(([k]) => k !== 'all' && modeStats[k].battles > 0)
+      .filter(([k]) => k !== 'all' && !SYNTHETIC_TYPES[k] && modeStats[k].battles > 0)
       .sort(([, a], [, b]) => b.battles - a.battles);
     const colors = [CHART_COLORS.accent, CHART_COLORS.accent2, CHART_COLORS.teal, CHART_COLORS.orange, CHART_COLORS.purple, CHART_COLORS.pink, CHART_COLORS.indigo, CHART_COLORS.lime, CHART_COLORS.red];
 
@@ -495,20 +501,33 @@ class Dashboard {
 
     // Apply mode filter
     if (mode !== 'all') {
-      const m = typeof mode === 'string' ? parseInt(mode) : mode;
-      ships = ships.filter(s => s.byMode[m] && s.byMode[m].battles > 0).map(s => {
-        const d = s.byMode[m];
-        const deaths = d.battles - d.survived;
+      // Determine which raw mode keys to merge for this tab
+      const sourceKeys = (typeof mode === 'string' && SYNTHETIC_TYPES[mode])
+        ? SYNTHETIC_TYPES[mode].sources
+        : [typeof mode === 'string' ? parseInt(mode) : mode];
+
+      ships = ships.filter(s => sourceKeys.some(k => s.byMode[k] && s.byMode[k].battles > 0)).map(s => {
+        // Merge stats from all source modes
+        let battles = 0, wins = 0, damage = 0, frags = 0, survived = 0;
+        let shotsMain = 0, hitsMain = 0, shotsTorp = 0, hitsTorp = 0;
+        for (const k of sourceKeys) {
+          const d = s.byMode[k];
+          if (!d) continue;
+          battles += d.battles; wins += d.wins; damage += d.damage; frags += d.frags; survived += d.survived;
+          shotsMain += (d.shotsMain || 0); hitsMain += (d.hitsMain || 0);
+          shotsTorp += (d.shotsTorp || 0); hitsTorp += (d.hitsTorp || 0);
+        }
+        const deaths = battles - survived;
         return {
           ...s,
-          battles: d.battles, wins: d.wins, damage: d.damage, frags: d.frags, survived: d.survived,
-          winRate: d.battles > 0 ? (d.wins / d.battles * 100) : 0,
-          avgDamage: d.battles > 0 ? Math.round(d.damage / d.battles) : 0,
-          kd: deaths > 0 ? (d.frags / deaths) : d.frags,
-          survivalRate: d.battles > 0 ? (d.survived / d.battles * 100) : 0,
-          mainAccuracy: d.shotsMain > 0 ? (d.hitsMain / d.shotsMain * 100) : 0,
-          torpAccuracy: d.shotsTorp > 0 ? (d.hitsTorp / d.shotsTorp * 100) : 0,
-          shotsTorp: d.shotsTorp || 0,
+          battles, wins, damage, frags, survived,
+          winRate: battles > 0 ? (wins / battles * 100) : 0,
+          avgDamage: battles > 0 ? Math.round(damage / battles) : 0,
+          kd: deaths > 0 ? (frags / deaths) : frags,
+          survivalRate: battles > 0 ? (survived / battles * 100) : 0,
+          mainAccuracy: shotsMain > 0 ? (hitsMain / shotsMain * 100) : 0,
+          torpAccuracy: shotsTorp > 0 ? (hitsTorp / shotsTorp * 100) : 0,
+          shotsTorp,
         };
       });
     }
