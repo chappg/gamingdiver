@@ -28,7 +28,11 @@ function fmt(n) {
   return n.toLocaleString();
 }
 function pct(n) { return n.toFixed(1) + '%'; }
-function wpct(n) { return n.toFixed(3) + '%'; }
+function wpct(n, battles) {
+  if (battles >= 10000) return n.toFixed(3) + '%';
+  if (battles >= 1000) return n.toFixed(2) + '%';
+  return n.toFixed(1) + '%';
+}
 function winClass(wr) {
   if (wr >= 55) return 'win-high';
   if (wr >= 50) return 'win-mid';
@@ -120,7 +124,7 @@ class Dashboard {
     const cards = document.getElementById('overviewCards');
     cards.innerHTML = [
       this.statCard(fmt(ms.battles), 'Battles', mode === 'all' ? `${c.totalSessions} sessions` : ''),
-      this.statCard(wpct(ms.winRate), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
+      this.statCard(wpct(ms.winRate, ms.battles), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
       this.statCard(fmt(ms.avgDamage), 'Avg Damage', `${fmt(ms.damage)} total`),
       this.statCard(ms.kd.toFixed(2), 'K/D Ratio', `${fmt(ms.frags)} kills`),
       this.statCard(pct(ms.survivalRate), 'Survival', ''),
@@ -159,7 +163,7 @@ class Dashboard {
             callbacks: {
               afterLabel: (ctx) => {
                 const v = entries[ctx.dataIndex][1];
-                return `Win Rate: ${wpct(v.winRate)}`;
+                return `Win Rate: ${wpct(v.winRate, v.battles)}`;
               }
             }
           }
@@ -336,10 +340,10 @@ class Dashboard {
     switch (metric) {
       case 'winRate':
         sorted = [...eligible].sort((a, b) => b.winRate - a.winRate);
-        valFn = s => wpct(s.winRate); label = 'Win %'; break;
+        valFn = s => wpct(s.winRate, s.battles); label = 'Win %'; break;
       case 'lowestWinRate':
         sorted = [...eligible].sort((a, b) => a.winRate - b.winRate);
-        valFn = s => wpct(s.winRate); label = 'Win %'; break;
+        valFn = s => wpct(s.winRate, s.battles); label = 'Win %'; break;
       case 'avgDamage':
         sorted = [...eligible].sort((a, b) => b.avgDamage - a.avgDamage);
         valFn = s => fmt(s.avgDamage); label = 'Avg Dmg'; break;
@@ -540,7 +544,7 @@ class Dashboard {
         <td>${s.nation}</td>
         <td>${s.class}</td>
         <td class="num">${s.battles.toLocaleString()}</td>
-        <td class="num ${winClass(s.winRate)}">${wpct(s.winRate)}</td>
+        <td class="num ${winClass(s.winRate)}">${wpct(s.winRate, s.battles)}</td>
         <td class="num">${s.avgDamage.toLocaleString()}</td>
         <td class="num">${s.kd.toFixed(2)}</td>
         <td class="num">${pct(s.survivalRate)}</td>
@@ -652,8 +656,8 @@ class Dashboard {
         <div class="snapshot-latest">
           <div class="snapshot-period">Latest: ${fmtDate(latest.from)} → ${fmtDate(latest.to)} · ${latest.battles} battles</div>
           <div class="stat-cards">
-            ${this.statCard(wpct(latest.winRate), 'Win Rate' + trend(wrVals),
-              prevP ? delta(latest.winRate, prevP.winRate, n => n.toFixed(3), '%') : '')}
+            ${this.statCard(wpct(latest.winRate, latest.battles), 'Win Rate' + trend(wrVals),
+              prevP ? delta(latest.winRate, prevP.winRate, n => n.toFixed(2), '%') : '')}
             ${this.statCard(latest.kd.toFixed(2), 'K/D Ratio' + trend(kdVals),
               prevP ? delta(latest.kd, prevP.kd, n => n.toFixed(2)) : '')}
             ${this.statCard(fmt(latest.avgDamage), 'Avg Damage' + trend(dmgVals),
