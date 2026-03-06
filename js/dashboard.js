@@ -83,6 +83,7 @@ class Dashboard {
         tab.classList.add('active');
         document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
         Object.values(this.charts).forEach(c => c.resize?.());
+        if (typeof trackEvent === 'function') trackEvent('tab-' + tab.dataset.tab);
       });
     });
   }

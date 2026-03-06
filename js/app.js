@@ -94,6 +94,13 @@ async function clearCache() {
   } catch {}
 }
 
+// Analytics — GoatCounter custom events (privacy-safe, no cookies)
+function trackEvent(name) {
+  if (window.goatcounter?.count) {
+    window.goatcounter.count({ path: 'event/' + name, title: name, event: true });
+  }
+}
+
 // App
 class App {
   constructor() {
@@ -132,6 +139,7 @@ class App {
     // Example data link
     document.getElementById('loadExample')?.addEventListener('click', async (e) => {
       e.preventDefault();
+      trackEvent('example-click');
       this.showProgress('Loading example data...');
       try {
         const resp = await fetch('example-data.zip');
@@ -158,11 +166,13 @@ class App {
   async checkCache() {
     const cached = await getCachedResults();
     if (cached) {
+      trackEvent('return-visit');
       await this.showDashboard(cached);
     }
   }
 
   async handleFiles(files) {
+    trackEvent('own-upload');
     this.showProgress('Reading files...');
     await this.processFile(files[0]);
   }
