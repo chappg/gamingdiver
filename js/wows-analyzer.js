@@ -402,9 +402,18 @@ class WoWSAnalyzer {
       console.log('[GamingDiver] Merged export data into SLUG entries by name:', [...slugsMerged]);
     }
 
+    // Debug: log all export VEHICLE_NAMEs that contain "shi" (case-insensitive)
+    for (const row of shipStats) {
+      if (/shi/i.test(row.VEHICLE_NAME)) {
+        console.log('[GamingDiver] DEBUG Shi-match:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
+      }
+    }
+
     // Add any user ships not in VEHICLE_MAP and not already merged
+    const unmatchedExport = [];
     for (const row of shipStats) {
       if (!seen.has(row.VEHICLE_NAME)) {
+        unmatchedExport.push(row.VEHICLE_NAME);
         console.warn('[GamingDiver] Ship in export but not in vehicle mapping:', row.VEHICLE_NAME);
         const info = resolveVehicle(row.VEHICLE_NAME);
         ships.push({
@@ -417,6 +426,10 @@ class WoWSAnalyzer {
           exp: parseInt(row.CURRENT_EXP) || 0,
         });
       }
+    }
+
+    if (unmatchedExport.length > 0) {
+      console.warn('[GamingDiver] Total unmatched export ships:', unmatchedExport.length, unmatchedExport);
     }
 
     ships.sort((a, b) => tierNum(b.tier) - tierNum(a.tier) || a.name.localeCompare(b.name));
