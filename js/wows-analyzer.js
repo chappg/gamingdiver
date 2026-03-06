@@ -30,7 +30,7 @@ function resolveVehicle(internalName) {
   if (typeof VEHICLE_MAP !== 'undefined' && VEHICLE_MAP[internalName]) return VEHICLE_MAP[internalName];
   const m = internalName.match(/^([A-Z]{2})([A-Z]{2})\d+_(.+)$/);
   if (!m) return { name: internalName, nation: 'Unknown', class: 'Unknown', tier: '?', premium: false };
-  const nm = { PA: 'U.S.A.', PJ: 'Japan', PG: 'Germany', PB: 'U.K.', PF: 'France', PI: 'Italy', PR: 'U.S.S.R.', PE: 'Europe', PZ: 'Pan-Asia', PX: 'Event', PU: 'Commonwealth', PT: 'Spain' };
+  const nm = { PA: 'U.S.A.', PJ: 'Japan', PG: 'Germany', PB: 'U.K.', PF: 'France', PI: 'Italy', PR: 'U.S.S.R.', PE: 'Pan-Europe', PZ: 'Pan-Asia', PX: 'Event', PU: 'Commonwealth', PT: 'Spain' };
   const cm = { SB: 'Battleship', SC: 'Cruiser', SD: 'Destroyer', SA: 'Carrier' };
   return { name: m[3].replace(/_/g, ' ').replace(/\s+\d{4}$/, ''), nation: nm[m[1]] || 'Unknown', class: cm[m[2]] || 'Unknown', tier: '?', premium: false };
 }

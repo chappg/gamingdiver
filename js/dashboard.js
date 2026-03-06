@@ -17,7 +17,7 @@ const DEFAULT_MODE = 'standard_all';
 // Flag icons via flag-icons CSS (works in all browsers, no emoji dependency)
 const NATION_FLAGS = {
   'U.S.A.': 'us', 'Japan': 'jp', 'U.K.': 'gb', 'Germany': 'de',
-  'France': 'fr', 'U.S.S.R.': null, 'Italy': 'it', 'Europe': 'eu',
+  'France': 'fr', 'U.S.S.R.': null, 'Italy': 'it', 'Pan-Europe': 'eu',
   'Pan-Asia': 'cn', 'Commonwealth': 'au', 'Pan-America': 'br',
   'Netherlands': 'nl', 'Spain': 'es', 'Event': null,
 };
@@ -32,7 +32,7 @@ function flagIcon(nation) {
 const NATION_ICONS = new Proxy({}, {
   get: (_, nation) => flagIcon(nation)
 });
-const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
+const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Pan-Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
 // Premium ship recovery ticket costs (silver credits) by tier — via Wargaming support
 const RECOVERY_COST = {
