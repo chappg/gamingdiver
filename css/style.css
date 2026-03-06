@@ -325,6 +325,10 @@ body {
 }
 .ship-card:hover { border-color: var(--accent-dim); background: var(--bg-card-hover); }
 .ship-card.not-owned { opacity: 0.4; }
+.ship-card.sold { opacity: 0.85; border-color: var(--orange); border-style: dashed; }
+.ship-card.sold:hover { border-color: var(--orange); background: rgba(255,152,0,0.08); }
+.sc-recovery { font-size: 0.8em; color: var(--orange); margin-top: 4px; font-weight: 500; }
+.sold-stat .cs-num { color: var(--orange); }
 .ship-card .sc-name { font-weight: 600; color: var(--text-bright); margin-bottom: 4px; font-size: 0.95em; }
 .ship-card .sc-meta { font-size: 0.8em; color: var(--text-dim); }
 .ship-card .sc-stats { display: flex; gap: 12px; margin-top: 8px; font-size: 0.85em; }

@@ -34,6 +34,12 @@ const NATION_ICONS = new Proxy({}, {
 });
 const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
+// Premium ship recovery ticket costs (silver credits) by tier — via Wargaming support
+const RECOVERY_COST = {
+  'I': null, 'II': 1500000, 'III': 5625000, 'IV': 9375000,
+  'V': 15000000, 'VI': 18750000, 'VII': 26250000, 'VIII': 37500000,
+};
+
 function fmt(n) {
   if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
   if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
@@ -912,13 +918,22 @@ class Dashboard {
     // Exclude Event ships from completion (temporary game mode clones)
     ships = ships.filter(s => s.nation !== 'Event');
 
+    // Mark sold ships: premium, not in garage, but has battle record
+    for (const s of ships) {
+      s.sold = s.premium && !s.inGarage && s.battles > 0;
+      s.recoveryCost = s.sold ? (RECOVERY_COST[s.tier] || null) : null;
+    }
+
     const owned = ships.filter(s => s.inGarage).length;
+    const sold = ships.filter(s => s.sold);
+    const totalRecoveryCost = sold.reduce((sum, s) => sum + (s.recoveryCost || 0), 0);
     const techTree = ships.filter(s => !s.premium);
     const premiums = ships.filter(s => s.premium);
     const completion = {
       all: { owned, total: ships.length },
       techTree: { owned: techTree.filter(s => s.inGarage).length, total: techTree.length },
       premium: { owned: premiums.filter(s => s.inGarage).length, total: premiums.length },
+      sold: { count: sold.length, totalCost: totalRecoveryCost },
       byNation: {},
     };
     const nations = [...new Set(ships.map(s => s.nation))].sort();
@@ -942,11 +957,15 @@ class Dashboard {
     const pct = (o, t) => t > 0 ? Math.round(o / t * 100) : 0;
 
     const statsEl = document.getElementById('collectionStats');
+    const soldStats = c.sold.count > 0
+      ? `<div class="collection-stat sold-stat"><span class="cs-num">${c.sold.count}</span><span class="cs-label">Sold (${fmt(c.sold.totalCost)} 🪙 to recover)</span></div>`
+      : '';
     statsEl.innerHTML = [
       `<div class="collection-stat"><span class="cs-num">${pct(c.all.owned, c.all.total)}%</span><span class="cs-label">Complete (${c.all.owned}/${c.all.total})</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${pct(c.techTree.owned, c.techTree.total)}%</span><span class="cs-label">Tech Tree (${c.techTree.owned}/${c.techTree.total})</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${pct(c.premium.owned, c.premium.total)}%</span><span class="cs-label">Premium (${c.premium.owned}/${c.premium.total})</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${coll.played}</span><span class="cs-label">Ships Played</span></div>`,
+      soldStats,
     ].join('');
 
     // Per-nation completion bars
@@ -1052,6 +1071,7 @@ class Dashboard {
     if (tier) ships = ships.filter(s => s.tier === tier);
     if (type === 'tech') ships = ships.filter(s => !s.premium);
     if (type === 'premium') ships = ships.filter(s => s.premium);
+    if (type === 'sold') ships = ships.filter(s => s.sold);
     if (ownedOnly) ships = ships.filter(s => s.inGarage);
 
     // Show filtered completion summary
@@ -1065,19 +1085,37 @@ class Dashboard {
       filterSummary.className = 'coll-filter-summary';
       document.getElementById('collectionGrid').parentNode.insertBefore(filterSummary, document.getElementById('collectionGrid'));
     }
-    filterSummary.innerHTML = `<strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned`;
+    const soldCount = ships.filter(s => s.sold).length;
+    const soldSuffix = soldCount > 0 && type !== 'sold'
+      ? ` · <span style="color:var(--orange)">${soldCount} sold</span>`
+      : '';
+    const soldTotal = type === 'sold'
+      ? ` — 🪙 ${fmt(ships.reduce((sum, s) => sum + (s.recoveryCost || 0), 0))} total recovery cost`
+      : '';
+    filterSummary.innerHTML = `<strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned${soldSuffix}${soldTotal}`;
 
     const grid = document.getElementById('collectionGrid');
-    grid.innerHTML = ships.map(s => `
-      <div class="ship-card ${s.inGarage ? '' : 'not-owned'}">
+    grid.innerHTML = ships.map(s => {
+      const statusClass = s.inGarage ? '' : s.sold ? 'sold' : 'not-owned';
+      const statusLabel = s.inGarage
+        ? '<span class="sc-stat" style="color:var(--green)">✓ Owned</span>'
+        : s.sold
+          ? '<span class="sc-stat" style="color:var(--orange)">⚠ Sold</span>'
+          : '<span class="sc-stat" style="color:var(--text-dim)">Not owned</span>';
+      const recoveryCost = s.sold && s.recoveryCost
+        ? `<div class="sc-recovery">🪙 ${fmt(s.recoveryCost)} to recover</div>`
+        : '';
+      return `
+      <div class="ship-card ${statusClass}">
         <div class="sc-name"><span class="tier-badge">${s.tier}</span>${s.name}</div>
         <div class="sc-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} ${s.premium ? '• Premium' : ''}</div>
         <div class="sc-stats">
           <span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> battles</span>
-          ${s.inGarage ? '<span class="sc-stat" style="color:var(--green)">✓ Owned</span>' : '<span class="sc-stat" style="color:var(--text-dim)">Not owned</span>'}
+          ${statusLabel}
         </div>
+        ${recoveryCost}
         ${s.lastBattle ? `<div class="sc-meta" style="margin-top:4px">Last: ${s.lastBattle.substring(0, 10)}</div>` : ''}
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 }
