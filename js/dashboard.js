@@ -309,9 +309,9 @@ class Dashboard {
 
   renderTopShips() {
     const metric = this.currentTopMetric || 'battles';
-    const totalBattles = this.r.career.modeStats['all']?.battles || 0;
-    const minBattles = totalBattles < 1000 ? 1 : 10;
     const mode = this.currentOverviewMode;
+    const modeBattles = this.r.career.modeStats[mode]?.battles || 0;
+    const minBattles = modeBattles < 1000 ? 1 : 10;
     const filterNation = this.topFilterNation || '';
     const filterTier = this.topFilterTier || '';
     const filterType = this.topFilterType || '';
@@ -405,8 +405,17 @@ class Dashboard {
     // Mode tabs for ships tab
     this.buildModeTabs('shipModeTabs', this.currentShipMode, (mode) => {
       this.currentShipMode = mode;
+      // Auto-adjust min battles based on mode's total games
+      const modeBattles = this.r.career.modeStats[mode]?.battles || 0;
+      const input = document.getElementById('filterMinBattles');
+      if (input) input.value = modeBattles < 1000 ? '1' : '10';
       this.renderShipTable();
     });
+
+    // Set initial min battles based on default mode
+    const initModeBattles = this.r.career.modeStats[this.currentShipMode]?.battles || 0;
+    const initInput = document.getElementById('filterMinBattles');
+    if (initInput) initInput.value = initModeBattles < 1000 ? '1' : '10';
 
     this.renderShipTable();
 
@@ -483,11 +492,9 @@ class Dashboard {
       });
     });
 
-    // Min battles — lower default for players with <1000 games
+    // Min battles — lower default for modes with <1000 games
     const minBattlesInput = document.getElementById('filterMinBattles');
     if (minBattlesInput) {
-      const totalBattles = this.r.career.modeStats['all']?.battles || 0;
-      if (totalBattles < 1000) minBattlesInput.value = '1';
       minBattlesInput.addEventListener('change', () => this.renderShipTable());
     }
   }
