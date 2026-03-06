@@ -345,21 +345,23 @@ class WoWSAnalyzer {
     }
 
     // Build name→SLUG lookup for merging export data into SLUG-only entries
-    const slugByName = {};
+    // Use normalized key (lowercase, trimmed) for fuzzy matching
+    const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const slugByNorm = {};
     if (typeof VEHICLE_MAP !== 'undefined') {
       for (const [key, info] of Object.entries(VEHICLE_MAP)) {
         if (key.startsWith('SLUG_')) {
-          slugByName[info.name] = key;
+          slugByNorm[norm(info.name)] = key;
         }
       }
     }
 
     // Build reverse lookup: export internal IDs → resolved names (for SLUG matching)
-    const exportNameToId = {};
+    const exportNormToId = {};
     for (const row of shipStats) {
       if (typeof VEHICLE_MAP === 'undefined' || !VEHICLE_MAP[row.VEHICLE_NAME]) {
         const info = resolveVehicle(row.VEHICLE_NAME);
-        exportNameToId[info.name] = row.VEHICLE_NAME;
+        exportNormToId[norm(info.name)] = row.VEHICLE_NAME;
       }
     }
 
@@ -372,14 +374,14 @@ class WoWSAnalyzer {
         if (info.nation === 'Event') continue;
         seen.add(internal);
 
-        // For SLUG entries, try to match export data by resolved name
+        // For SLUG entries, try to match export data by normalized name
         let ud = userData[internal];
-        if (!ud && internal.startsWith('SLUG_') && exportNameToId[info.name]) {
-          const exportId = exportNameToId[info.name];
+        if (!ud && internal.startsWith('SLUG_') && exportNormToId[norm(info.name)]) {
+          const exportId = exportNormToId[norm(info.name)];
           ud = userData[exportId];
           if (ud) {
             seen.add(exportId);
-            slugsMerged.add(internal);
+            slugsMerged.add(internal + ' ← ' + exportId);
           }
         }
         ud = ud || {};
