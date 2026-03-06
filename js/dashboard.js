@@ -967,6 +967,7 @@ class Dashboard {
       ? `<div class="collection-stat sold-stat"><span class="cs-num">${c.sold.count}</span><span class="cs-label">Sold (${fmt(c.sold.totalCost)} 🪙 to recover)</span></div>`
       : '';
     statsEl.innerHTML = [
+      `<div class="collection-stat"><span class="cs-num">${c.all.owned}</span><span class="cs-label">Ships Owned</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${pct(c.all.owned, c.all.total)}%</span><span class="cs-label">Complete (${c.all.owned}/${c.all.total})</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${pct(c.techTree.owned, c.techTree.total)}%</span><span class="cs-label">Tech Tree (${c.techTree.owned}/${c.techTree.total})</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${pct(c.premium.owned, c.premium.total)}%</span><span class="cs-label">Premium (${c.premium.owned}/${c.premium.total})</span></div>`,
