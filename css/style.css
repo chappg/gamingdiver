@@ -377,3 +377,7 @@ footer a { color: var(--accent-dim); }
 .trend-up { color: #4caf50; font-size: 0.85em; }
 .trend-down { color: #ef5350; font-size: 0.85em; }
 .trend-flat { color: var(--text-dim); font-size: 0.85em; }
+
+/* Ad container */
+.ad-container { max-width: 728px; margin: 20px auto; text-align: center; min-height: 0; }
+.ad-container:empty, .ad-container ins:empty { display: none; }
