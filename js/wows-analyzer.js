@@ -402,22 +402,54 @@ class WoWSAnalyzer {
       console.log('[GamingDiver] Merged export data into SLUG entries by name:', [...slugsMerged]);
     }
 
-    // Debug: log table info and search for missing ships
+    // Comprehensive debug: find missing ships
     const byType = this.data['WOWSL_Ship_Statistics_By_Type'] || [];
-    console.log('[GamingDiver] DEBUG Ship_Statistics rows:', shipStats.length, 'By_Type rows:', byType.length);
-    if (byType.length > 0) console.log('[GamingDiver] DEBUG By_Type columns:', Object.keys(byType[0]));
+    console.log('[GamingDiver] DEBUG Ship_Statistics:', shipStats.length, 'rows | By_Type:', byType.length, 'rows');
     if (shipStats.length > 0) console.log('[GamingDiver] DEBUG Ship_Stats columns:', Object.keys(shipStats[0]));
-    // Search ALL Pan-Asia (PZ) entries in both tables
+    if (byType.length > 0) console.log('[GamingDiver] DEBUG By_Type columns:', Object.keys(byType[0]));
+
+    // 1. List ALL export VEHICLE_NAMEs (sorted) so we can visually scan
+    const allExportIds = shipStats.map(r => r.VEHICLE_NAME).sort();
+    console.log('[GamingDiver] DEBUG ALL export VEHICLE_NAMEs (' + allExportIds.length + '):', allExportIds);
+
+    // 2. Check for duplicate VEHICLE_MAP internal IDs (multiple entries with same key)
+    if (typeof VEHICLE_MAP !== 'undefined') {
+      const vmNames = {};
+      for (const [k, v] of Object.entries(VEHICLE_MAP)) {
+        const n = v.name;
+        if (!vmNames[n]) vmNames[n] = [];
+        vmNames[n].push(k);
+      }
+      const dupes = Object.entries(vmNames).filter(([, keys]) => keys.length > 1);
+      if (dupes.length > 0) console.warn('[GamingDiver] DEBUG Duplicate names in VEHICLE_MAP:', dupes);
+    }
+
+    // 3. Check if any export ID maps to a VEHICLE_MAP entry whose name differs wildly
     for (const row of shipStats) {
-      if (/^PZ/i.test(row.VEHICLE_NAME)) {
-        console.log('[GamingDiver] DEBUG PZ Ship_Stats:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
+      const vm = typeof VEHICLE_MAP !== 'undefined' ? VEHICLE_MAP[row.VEHICLE_NAME] : null;
+      if (vm) {
+        const resolved = resolveVehicle(row.VEHICLE_NAME);
+        // Flag if the mapped name is very different from regex-parsed name
+        if (vm.name !== resolved.name && norm(vm.name) !== norm(resolved.name)) {
+          console.warn('[GamingDiver] DEBUG Name mismatch:', row.VEHICLE_NAME, '→ map:', vm.name, '| regex:', resolved.name);
+        }
       }
     }
-    for (const row of byType) {
-      if (/tenr/i.test(row.VEHICLE_NAME)) {
-        console.log('[GamingDiver] DEBUG Tenryu By_Type:', row.VEHICLE_NAME, JSON.stringify(row));
-      }
-    }
+
+    // 4. Check all tables for anything Pan-Asia or Tenryū-like
+    const allByTypeIds = [...new Set(byType.map(r => r.VEHICLE_NAME))].sort();
+    const pzExport = allExportIds.filter(id => /^PZ/i.test(id));
+    const pzByType = allByTypeIds.filter(id => /^PZ/i.test(id));
+    console.log('[GamingDiver] DEBUG Pan-Asia in Ship_Stats:', pzExport);
+    console.log('[GamingDiver] DEBUG Pan-Asia in By_Type:', pzByType);
+    const tenrExport = allExportIds.filter(id => /tenr/i.test(id));
+    const tenrByType = allByTypeIds.filter(id => /tenr/i.test(id));
+    if (tenrExport.length) console.log('[GamingDiver] DEBUG Tenryu in Ship_Stats:', tenrExport);
+    if (tenrByType.length) console.log('[GamingDiver] DEBUG Tenryu in By_Type:', tenrByType);
+    if (!tenrExport.length && !tenrByType.length) console.warn('[GamingDiver] DEBUG Tenryu NOT FOUND in any table');
+
+    // 5. List ALL CSV table names in the export
+    console.log('[GamingDiver] DEBUG All tables in export:', Object.keys(this.data));
 
     // Add any user ships not in VEHICLE_MAP and not already merged
     const unmatchedExport = [];
