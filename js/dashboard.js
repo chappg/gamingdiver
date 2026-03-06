@@ -14,12 +14,22 @@ const DEFAULT_MODE = 'standard_all';
 
 // Nation display order and labels (shared across all tabs)
 // Use navy abbreviations familiar to WoWS players
-const NATION_ICONS = {
-  'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
-  'France': '🇫🇷', 'U.S.S.R.': '🇷🇺', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
-  'Pan-Asia': '🌏', 'Commonwealth': '🌐', 'Pan-America': '🌎',
-  'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '🎪',
+// Flag icons via flag-icons CSS (works in all browsers, no emoji dependency)
+const NATION_FLAGS = {
+  'U.S.A.': 'us', 'Japan': 'jp', 'U.K.': 'gb', 'Germany': 'de',
+  'France': 'fr', 'U.S.S.R.': 'ru', 'Italy': 'it', 'Europe': 'eu',
+  'Pan-Asia': 'cn', 'Commonwealth': 'au', 'Pan-America': 'br',
+  'Netherlands': 'nl', 'Spain': 'es', 'Event': null,
 };
+function flagIcon(nation) {
+  const code = NATION_FLAGS[nation];
+  if (!code) return nation === 'Event' ? '🎪' : '?';
+  return `<span class="fi fi-${code}" title="${nation}"></span>`;
+}
+// Legacy compat — used in templates that expect a string
+const NATION_ICONS = new Proxy({}, {
+  get: (_, nation) => flagIcon(nation)
+});
 const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
 function fmt(n) {
@@ -407,7 +417,7 @@ class Dashboard {
           <div class="top-ship-rank ${rankCls}">${i + 1}</div>
           <div class="top-ship-info">
             <div class="top-ship-name"><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</div>
-            <div class="top-ship-meta">${s.nation} • ${s.class} • ${s.battles} battles</div>
+            <div class="top-ship-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} • ${s.battles} battles</div>
           </div>
           <div class="top-ship-stat">
             <div class="ts-val">${valFn(s)}</div>
@@ -599,7 +609,7 @@ class Dashboard {
     tbody.innerHTML = ships.map(s => `
       <tr>
         <td><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</td>
-        <td>${s.nation}</td>
+        <td>${flagIcon(s.nation)} ${s.nation}</td>
         <td>${s.class}</td>
         <td class="num">${s.battles.toLocaleString()}</td>
         <td class="num ${winClass(s.winRate)}">${wpct(s.winRate, s.battles)}</td>
@@ -979,7 +989,7 @@ class Dashboard {
     grid.innerHTML = ships.map(s => `
       <div class="ship-card ${s.inGarage ? '' : 'not-owned'}">
         <div class="sc-name"><span class="tier-badge">${s.tier}</span>${s.name}</div>
-        <div class="sc-meta">${s.nation} • ${s.class} ${s.premium ? '• Premium' : ''}</div>
+        <div class="sc-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} ${s.premium ? '• Premium' : ''}</div>
         <div class="sc-stats">
           <span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> battles</span>
           ${s.inGarage ? '<span class="sc-stat" style="color:var(--green)">✓ Owned</span>' : '<span class="sc-stat" style="color:var(--text-dim)">Not owned</span>'}

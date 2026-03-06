@@ -381,3 +381,7 @@ footer a { color: var(--accent-dim); }
 /* Ad container */
 .ad-container { max-width: 728px; margin: 20px auto; text-align: center; min-height: 0; }
 .ad-container:empty, .ad-container ins:empty { display: none; }
+
+/* Flag icons sizing */
+.nation-btn .fi, .nation-icon .fi { font-size: 1.2em; }
+.fi { vertical-align: middle; }
