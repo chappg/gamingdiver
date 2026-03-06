@@ -316,25 +316,32 @@ class Dashboard {
     const filterTier = this.topFilterTier || '';
     const filterType = this.topFilterType || '';
 
-    // Get ship stats for current mode
-    let eligible = this.r.ships.filter(s => {
-      if (mode === 'all') return s.battles >= minBattles;
-      return s.byMode[mode] && s.byMode[mode].battles >= minBattles;
-    });
+    // Get ship stats for current mode (handle synthetic types like 'standard_all')
+    const sourceKeys = (typeof mode === 'string' && SYNTHETIC_TYPES[mode])
+      ? SYNTHETIC_TYPES[mode].sources
+      : (mode !== 'all' ? [typeof mode === 'string' ? parseInt(mode) : mode] : null);
 
-    // Map to mode-specific stats
-    if (mode !== 'all') {
-      eligible = eligible.map(s => {
-        const d = s.byMode[mode];
-        const deaths = d.battles - d.survived;
+    let eligible;
+    if (!sourceKeys) {
+      // "all" mode — use top-level ship stats
+      eligible = this.r.ships.filter(s => s.battles >= minBattles);
+    } else {
+      eligible = this.r.ships.filter(s => sourceKeys.some(k => s.byMode[k] && s.byMode[k].battles > 0)).map(s => {
+        let battles = 0, wins = 0, damage = 0, frags = 0, survived = 0, maxFrags = 0;
+        for (const k of sourceKeys) {
+          const d = s.byMode[k];
+          if (!d) continue;
+          battles += d.battles; wins += d.wins; damage += d.damage; frags += d.frags; survived += d.survived;
+          if ((d.maxFrags || 0) > maxFrags) maxFrags = d.maxFrags || 0;
+        }
+        const deaths = battles - survived;
         return {
-          ...s,
-          battles: d.battles, wins: d.wins, damage: d.damage, frags: d.frags,
-          winRate: d.battles > 0 ? (d.wins / d.battles * 100) : 0,
-          avgDamage: d.battles > 0 ? Math.round(d.damage / d.battles) : 0,
-          kd: deaths > 0 ? (d.frags / deaths) : d.frags,
+          ...s, battles, wins, damage, frags, survived, maxFrags,
+          winRate: battles > 0 ? (wins / battles * 100) : 0,
+          avgDamage: battles > 0 ? Math.round(damage / battles) : 0,
+          kd: deaths > 0 ? (frags / deaths) : frags,
         };
-      });
+      }).filter(s => s.battles >= minBattles);
     }
 
     // Apply nation/tier/type filters
