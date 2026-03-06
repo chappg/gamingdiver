@@ -402,10 +402,17 @@ class WoWSAnalyzer {
       console.log('[GamingDiver] Merged export data into SLUG entries by name:', [...slugsMerged]);
     }
 
-    // Debug: log export ships matching keywords
+    // Debug: check both tables for Tenryū/Shi An
+    const byType = this.data['WOWSL_Ship_Statistics_By_Type'] || [];
+    console.log('[GamingDiver] DEBUG Ship_Statistics rows:', shipStats.length, 'Ship_Statistics_By_Type rows:', byType.length);
+    for (const row of byType) {
+      if (/tenr|shi.an|PJSC014|PJSC004|PZSC101/i.test(row.VEHICLE_NAME)) {
+        console.log('[GamingDiver] DEBUG By_Type:', row.VEHICLE_NAME, 'type:', row.BATTLE_TYPE, 'battles:', row.BATTLES_COUNT);
+      }
+    }
     for (const row of shipStats) {
-      if (/shi|tenr|PJSC/i.test(row.VEHICLE_NAME)) {
-        console.log('[GamingDiver] DEBUG export:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
+      if (/tenr|shi.an|PJSC014|PJSC004|PZSC101/i.test(row.VEHICLE_NAME)) {
+        console.log('[GamingDiver] DEBUG Ship_Stats:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
       }
     }
 
