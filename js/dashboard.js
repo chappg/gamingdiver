@@ -15,10 +15,10 @@ const DEFAULT_MODE = 3;
 // Nation display order and labels (shared across all tabs)
 // Use navy abbreviations familiar to WoWS players
 const NATION_ICONS = {
-  'U.S.A.': 'USN', 'Japan': 'IJN', 'U.K.': 'RN', 'Germany': 'KMS',
-  'France': 'MN', 'U.S.S.R.': 'VMF', 'Italy': 'RM', 'Europe': 'EUR',
-  'Pan-Asia': 'ASIA', 'Commonwealth': 'CW', 'Pan-America': 'PAN-AM',
-  'Netherlands': 'NL', 'Spain': 'ARM', 'Event': 'EVT',
+  'U.S.A.': '🇺🇸', 'Japan': '🇯🇵', 'U.K.': '🇬🇧', 'Germany': '🇩🇪',
+  'France': '🇫🇷', 'U.S.S.R.': '☭', 'Italy': '🇮🇹', 'Europe': '🇪🇺',
+  'Pan-Asia': '🌏', 'Commonwealth': '🌐', 'Pan-America': '🌎',
+  'Netherlands': '🇳🇱', 'Spain': '🇪🇸', 'Event': '🎪',
 };
 const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
 
