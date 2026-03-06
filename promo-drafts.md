@@ -13,22 +13,23 @@ Hey Legends!
 I built a free tool called **GamingDiver** that lets you upload your Wargaming data export and instantly see detailed stats about your career, ships, and progress.
 
 **What it does:**
-- 📊 **Career Overview** — Win rate, K/D, accuracy, battles by mode (PvP, Co-op, Ranked, Brawl), personal records
-- 🚢 **Ship Performance** — Sortable table of every ship you've played with win rate, avg damage, K/D, accuracy. Filter by nation, tier, class, tech tree vs premium
+- 📊 **Career Overview** — Win rate, K/D, accuracy, personal records, combat style breakdown. Separate tabs for Standard, Standard (Solo), Standard (Division), Ranked, Co-op, Arena, Brawl, and more
+- 🚢 **Ship Performance** — Sortable table of every ship you've played with win rate, avg damage, K/D, survival rate, and accuracy. Filter by nation (with actual country flags!), tier, class, tech tree vs premium
 - 📈 **Trends** — Monthly activity charts, play schedule heatmap, session duration analysis, and performance tracking over time (upload multiple exports to see how you're improving)
-- 🎯 **Collection** — Visual grid of your entire fleet with ownership and battle stats across 429+ mapped ships
+- 🏆 **Top 10 / Bottom 10** — Most played, best/worst win rate, highest/lowest damage, best K/D, max kills — with nation, tier, and type filters
+- 🎯 **Collection** — Visual grid of your entire fleet with ownership and battle stats across 450+ mapped ships
 
-**Privacy-first:** Everything runs in your browser. Your game data never leaves your machine. No accounts, no servers.
+**Privacy-first:** Everything runs in your browser. Your game data never leaves your machine. No accounts, no servers, no cookies.
 
 **How to use it:**
-1. Go to [wargaming.net](https://wargaming.net) → Account Management → Request a Personal Data Export
+1. Go to [wargaming.net/personal_data](https://wargaming.net/personal_data/) → Request a Personal Data Export
 2. Wait for the email with your download link (usually a few hours)
 3. Go to [gamingdiver.com](https://gamingdiver.com) and drop the zip file
 4. Dive in!
 
 No export file handy? There's an example dataset on the site so you can see what it looks like first.
 
-This is a passion project — I play Legends and wanted better stat tools than what's out there. Feedback welcome! What stats would you want to see added?
+This is a passion project — I play Legends and wanted better stat tools than what's out there. Feedback and feature requests welcome via [GitHub Issues](https://github.com/chappg/gamingdiver/issues)!
 
 🔗 [gamingdiver.com](https://gamingdiver.com)
 
@@ -44,9 +45,10 @@ Made a tool called GamingDiver that analyzes your Wargaming data export. Complet
 
 Shows you things like:
 - Your best and worst ships by win rate, damage, and K/D
+- Stats per mode — Standard, Solo, Division, Ranked, Co-op, Arena, Brawl
 - Which ship classes and tiers you perform best in
 - Monthly activity trends and session patterns
-- Your full collection with 429+ ships mapped
+- Your full collection with 450+ ships mapped
 
 Try it: [gamingdiver.com](https://gamingdiver.com)
 
@@ -63,7 +65,7 @@ Just launched a free tool to visualize your Legends career stats. Request your d
 • Career stats across all modes (PvP/Co-op/Ranked/Brawl)
 • Ship-by-ship performance with filters for nation, tier, and class
 • Trends — see how your stats change over time
-• Your complete ship collection (429+ ships mapped)
+• Your complete ship collection (450+ ships mapped)
 
 Privacy-first — your game data stays in your browser. No accounts needed.
 
@@ -95,9 +97,9 @@ As a Legends player, I wanted to dig deeper into my stats than the in-game tools
 - Top 10 / Bottom 10 breakdowns (most played, best win rate, highest damage, etc.)
 - Monthly activity and play schedule heatmap
 - Snapshot-based trend tracking — upload your export periodically to track improvement
-- Ship collection grid with 429+ ships mapped
+- Ship collection grid with 450+ ships mapped
 
-**Privacy:** 100% client-side. Your game data stays in your browser.
+**Privacy:** Fully client-side. Your game data stays in your browser. No accounts, no cookies.
 
 **How to get started:**
 1. Request your data export at wargaming.net (Account Management → Personal Data)
@@ -114,7 +116,7 @@ Feedback and feature requests welcome. What would you add?
 🤿 Launched GamingDiver — a free, privacy-first stat analyzer for World of Warships: Legends
 
 📊 Career stats, ship performance, trends & collection tracking
-🔒 100% client-side — your game data never leaves your browser
+🔒 Fully client-side — your game data never leaves your browser
 🆓 No accounts, no cost
 
 Try it → gamingdiver.com
