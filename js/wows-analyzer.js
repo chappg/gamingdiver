@@ -146,10 +146,11 @@ class WoWSAnalyzer {
       }
     }
 
-    // Compute "all modes" totals
+    // Compute "all modes" totals (exclude synthetic aggregates to avoid double-counting)
     let totalBattles = 0, totalWins = 0, totalFrags = 0, totalDamage = 0, totalSurvived = 0;
     let totalShotsMain = 0, totalHitsMain = 0, totalShotsTorp = 0, totalHitsTorp = 0;
-    for (const ms of Object.values(modeStats)) {
+    for (const [key, ms] of Object.entries(modeStats)) {
+      if (SYNTHETIC_TYPES[key]) continue; // skip synthetic aggregates
       totalBattles += ms.battles; totalWins += ms.wins; totalFrags += ms.frags;
       totalDamage += ms.damage; totalSurvived += ms.survived;
       totalShotsMain += ms.shotsMain; totalHitsMain += ms.hitsMain;

@@ -33,6 +33,10 @@ function wpct(n, battles) {
   if (battles >= 1000) return n.toFixed(2) + '%';
   return n.toFixed(1) + '%';
 }
+function fmtKd(kd, battles) {
+  if (battles >= 1000) return kd.toFixed(3);
+  return kd.toFixed(2);
+}
 function winClass(wr) {
   if (wr >= 55) return 'win-high';
   if (wr >= 50) return 'win-mid';
@@ -132,7 +136,7 @@ class Dashboard {
       this.statCard(fmt(ms.battles), 'Battles', mode === 'all' ? `${c.totalSessions} sessions` : ''),
       this.statCard(wpct(ms.winRate, ms.battles), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
       this.statCard(fmt(ms.avgDamage), 'Avg Damage', `${fmt(ms.damage)} total`),
-      this.statCard(ms.kd.toFixed(2), 'K/D Ratio', `${fmt(ms.frags)} kills`),
+      this.statCard(fmtKd(ms.kd, ms.battles), 'K/D Ratio', `${fmt(ms.frags)} kills`),
       this.statCard(pct(ms.survivalRate), 'Survival', ''),
       this.statCard(`${fmt(c.totalPlayTimeHours)}h`, 'Play Time', `~${c.avgSessionMin}m avg`),
       this.statCard(pct(ms.mainAccuracy), 'Main Acc.', ''),
@@ -226,7 +230,22 @@ class Dashboard {
   renderRecords() {
     const mode = this.currentOverviewMode;
     const recByMode = this.r.records;
-    const rec = recByMode[mode] || recByMode['all'] || {};
+    // For synthetic modes, merge records from source types
+    let rec;
+    if (typeof mode === 'string' && SYNTHETIC_TYPES[mode]) {
+      rec = {};
+      for (const srcType of SYNTHETIC_TYPES[mode].sources) {
+        const srcRec = recByMode[srcType];
+        if (!srcRec) continue;
+        for (const field of ['maxDamage', 'maxFrags', 'maxExp', 'maxPlanes']) {
+          if (srcRec[field] && (!rec[field] || srcRec[field].value > rec[field].value)) {
+            rec[field] = srcRec[field];
+          }
+        }
+      }
+    } else {
+      rec = recByMode[mode] || recByMode['all'] || {};
+    }
     const grid = document.getElementById('recordsGrid');
     const cards = [];
     if (rec.maxDamage) cards.push(this.recordCard(fmt(rec.maxDamage.value), 'Max Damage', rec.maxDamage.ship));
@@ -366,7 +385,7 @@ class Dashboard {
         valFn = s => fmt(s.avgDamage); label = 'Avg Dmg'; break;
       case 'kd':
         sorted = [...eligible].sort((a, b) => b.kd - a.kd);
-        valFn = s => s.kd.toFixed(2); label = 'K/D'; break;
+        valFn = s => fmtKd(s.kd, s.battles); label = 'K/D'; break;
       case 'maxFrags':
         sorted = [...eligible].sort((a, b) => b.maxFrags - a.maxFrags);
         valFn = s => s.maxFrags.toString(); label = 'Max Kills'; break;
@@ -585,7 +604,7 @@ class Dashboard {
         <td class="num">${s.battles.toLocaleString()}</td>
         <td class="num ${winClass(s.winRate)}">${wpct(s.winRate, s.battles)}</td>
         <td class="num">${s.avgDamage.toLocaleString()}</td>
-        <td class="num">${s.kd.toFixed(2)}</td>
+        <td class="num">${fmtKd(s.kd, s.battles)}</td>
         <td class="num">${pct(s.survivalRate)}</td>
         <td class="num">${pct(s.mainAccuracy)}</td>
         <td class="num">${(s.shotsTorp || 0) > 0 ? pct(s.torpAccuracy) : '-'}</td>
@@ -697,8 +716,8 @@ class Dashboard {
           <div class="stat-cards">
             ${this.statCard(wpct(latest.winRate, latest.battles), 'Win Rate' + trend(wrVals),
               prevP ? delta(latest.winRate, prevP.winRate, n => n.toFixed(2), '%') : '')}
-            ${this.statCard(latest.kd.toFixed(2), 'K/D Ratio' + trend(kdVals),
-              prevP ? delta(latest.kd, prevP.kd, n => n.toFixed(2)) : '')}
+            ${this.statCard(fmtKd(latest.kd, latest.battles), 'K/D Ratio' + trend(kdVals),
+              prevP ? delta(latest.kd, prevP.kd, n => n.toFixed(3)) : '')}
             ${this.statCard(fmt(latest.avgDamage), 'Avg Damage' + trend(dmgVals),
               prevP ? delta(latest.avgDamage, prevP.avgDamage, n => fmt(Math.round(n))) : '')}
             ${this.statCard(latest.avgFrags.toFixed(2), 'Avg Kills', '')}
