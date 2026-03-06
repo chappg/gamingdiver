@@ -10,7 +10,7 @@
 
 Hey Legends!
 
-I built a free, open-source tool called **GamingDiver** that lets you upload your Wargaming data export and instantly see detailed stats about your career, ships, and progress.
+I built a free tool called **GamingDiver** that lets you upload your Wargaming data export and instantly see detailed stats about your career, ships, and progress.
 
 **What it does:**
 - 📊 **Career Overview** — Win rate, K/D, accuracy, battles by mode (PvP, Co-op, Ranked, Brawl), personal records
@@ -18,7 +18,7 @@ I built a free, open-source tool called **GamingDiver** that lets you upload you
 - 📈 **Trends** — Monthly activity charts, play schedule heatmap, session duration analysis, and performance tracking over time (upload multiple exports to see how you're improving)
 - 🎯 **Collection** — Visual grid of your entire fleet with ownership and battle stats across 429+ mapped ships
 
-**Privacy first:** Everything runs 100% in your browser. Your data never leaves your machine. No accounts, no servers, no tracking.
+**Privacy-first:** Everything runs in your browser. Your game data never leaves your machine. No accounts, no servers.
 
 **How to use it:**
 1. Go to [wargaming.net](https://wargaming.net) → Account Management → Request a Personal Data Export
@@ -30,7 +30,7 @@ No export file handy? There's an example dataset on the site so you can see what
 
 This is a passion project — I play Legends and wanted better stat tools than what's out there. Feedback welcome! What stats would you want to see added?
 
-[gamingdiver.com](https://gamingdiver.com) | [GitHub](https://github.com/chappg/gamingdiver)
+🔗 [gamingdiver.com](https://gamingdiver.com)
 
 ---
 
@@ -65,7 +65,7 @@ Just launched a free tool to visualize your Legends career stats. Request your d
 • Trends — see how your stats change over time
 • Your complete ship collection (429+ ships mapped)
 
-100% private — everything runs in your browser. No accounts needed.
+Privacy-first — your game data stays in your browser. No accounts needed.
 
 🔗 **gamingdiver.com**
 
@@ -97,7 +97,7 @@ As a Legends player, I wanted to dig deeper into my stats than the in-game tools
 - Snapshot-based trend tracking — upload your export periodically to track improvement
 - Ship collection grid with 429+ ships mapped
 
-**Privacy:** 100% client-side. Your data stays in your browser. Open source on GitHub.
+**Privacy:** 100% client-side. Your game data stays in your browser.
 
 **How to get started:**
 1. Request your data export at wargaming.net (Account Management → Personal Data)
@@ -114,8 +114,8 @@ Feedback and feature requests welcome. What would you add?
 🤿 Launched GamingDiver — a free, privacy-first stat analyzer for World of Warships: Legends
 
 📊 Career stats, ship performance, trends & collection tracking
-🔒 100% client-side — your data never leaves your browser
-🆓 No accounts, no cost, open source
+🔒 100% client-side — your game data never leaves your browser
+🆓 No accounts, no cost
 
 Try it → gamingdiver.com
 
@@ -124,7 +124,8 @@ Try it → gamingdiver.com
 ---
 
 ## Notes for Greg:
-- Register for GoatCounter at https://www.goatcounter.com (free for <100K pageviews/mo) with site code "gamingdiver"
-- For Google AdSense: apply at https://adsense.google.com after the domain is live and has some content/traffic. Approval usually takes a few days to a couple weeks.
+- GoatCounter registered ✅
+- For Google AdSense: apply at https://adsense.google.com after traffic starts. Approval takes days-to-weeks.
 - Alternative to AdSense for gaming: consider Nitropay, Playwire, or Ezoic — they're gaming-friendly and often pay better CPMs
 - Reddit posts should include a screenshot or two — the dashboard view with stats would be compelling
+- Screenshots saved in img/promo/ (career-overview.jpg, ship-performance.png, collection.png)

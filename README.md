@@ -50,4 +50,4 @@ All processing happens in JavaScript in your browser. No analytics, no tracking,
 
 ## License
 
-MIT
+Copyright © 2026 GamingDiver. All rights reserved.
