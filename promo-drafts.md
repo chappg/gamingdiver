@@ -19,7 +19,7 @@ I built a free tool called **GamingDiver** that lets you upload your Wargaming d
 - 🏆 **Top 10 / Bottom 10** — Most played, best/worst win rate, highest/lowest damage, best K/D, max kills — with nation, tier, and type filters
 - 🎯 **Collection** — Visual grid of your entire fleet with ownership and battle stats across 450+ mapped ships
 
-**Privacy-first:** Everything runs in your browser. Your game data never leaves your machine. No accounts, no servers, no cookies.
+**Privacy-first:** Everything runs in your browser. Your game data never leaves your machine. No accounts, no servers, no sign-up.
 
 **How to use it:**
 1. Go to [wargaming.net/personal_data](https://wargaming.net/personal_data/) → Request a Personal Data Export
@@ -99,7 +99,7 @@ As a Legends player, I wanted to dig deeper into my stats than the in-game tools
 - Snapshot-based trend tracking — upload your export periodically to track improvement
 - Ship collection grid with 450+ ships mapped
 
-**Privacy:** Fully client-side. Your game data stays in your browser. No accounts, no cookies.
+**Privacy:** Fully client-side. Your game data stays in your browser. No accounts, no sign-up.
 
 **How to get started:**
 1. Request your data export at wargaming.net (Account Management → Personal Data)
