@@ -33,6 +33,8 @@ const NATION_ICONS = new Proxy({}, {
   get: (_, nation) => flagIcon(nation)
 });
 const NATION_ORDER = ['U.S.A.', 'Japan', 'U.K.', 'Germany', 'France', 'U.S.S.R.', 'Italy', 'Pan-Europe', 'Pan-Asia', 'Commonwealth', 'Pan-America', 'Netherlands', 'Spain', 'Event'];
+const TIER_RANK = { 'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, '★': 9 };
+function tierRank(t) { return TIER_RANK[t] || 0; }
 
 // Premium ship recovery ticket costs (silver credits) by tier — via Wargaming support
 const RECOVERY_COST = {
@@ -406,7 +408,7 @@ class Dashboard {
         sorted = [...eligible].sort((a, b) => b.kd - a.kd);
         valFn = s => fmtKd(s.kd, s.battles); label = 'K/D'; break;
       case 'maxFrags':
-        sorted = [...eligible].sort((a, b) => b.maxFrags - a.maxFrags);
+        sorted = [...eligible].sort((a, b) => b.maxFrags - a.maxFrags || tierRank(b.tier) - tierRank(a.tier));
         valFn = s => s.maxFrags.toString(); label = 'Max Kills'; break;
       case 'leastBattles':
         sorted = [...eligible].sort((a, b) => a.battles - b.battles);
