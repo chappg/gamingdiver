@@ -402,10 +402,10 @@ class WoWSAnalyzer {
       console.log('[GamingDiver] Merged export data into SLUG entries by name:', [...slugsMerged]);
     }
 
-    // Debug: log all export VEHICLE_NAMEs that contain "shi" (case-insensitive)
+    // Debug: log export ships matching keywords
     for (const row of shipStats) {
-      if (/shi/i.test(row.VEHICLE_NAME)) {
-        console.log('[GamingDiver] DEBUG Shi-match:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
+      if (/shi|tenr|PJSC/i.test(row.VEHICLE_NAME)) {
+        console.log('[GamingDiver] DEBUG export:', row.VEHICLE_NAME, 'inGarage:', row.IN_GARAGE, 'battles:', row.BATTLES_COUNT);
       }
     }
 
