@@ -4,7 +4,7 @@ const BATTLE_TYPES = {
   1: { name: 'PvP (All)', group: 'pvp', aggregate: true },
   2: { name: 'Co-op (All)', group: 'coop', aggregate: true },
   3: { name: 'Standard', group: 'pvp' },
-  4: { name: 'Fleet Cup', group: 'competitive' },
+  4: { name: 'Division', group: 'pvp' },
   6: { name: 'Versus AI', group: 'coop' },
   9: { name: 'Ranked', group: 'competitive' },
   10: { name: 'Unknown (10)', group: 'other' },
