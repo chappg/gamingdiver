@@ -1074,11 +1074,28 @@ class Dashboard {
     const soldTotal = type === 'sold'
       ? ` — 🪙 ${fmt(ships.reduce((sum, s) => sum + (s.recoveryCost || 0), 0))} total recovery cost`
       : '';
+    // Build mini bar chart — per-nation completion from filtered ships
+    const nationBuckets = {};
+    for (const s of ships) {
+      const n = s.nation;
+      if (!nationBuckets[n]) nationBuckets[n] = { owned: 0, total: 0 };
+      nationBuckets[n].total++;
+      if (s.inGarage) nationBuckets[n].owned++;
+    }
+    const barNations = NATION_ORDER.filter(n => nationBuckets[n]);
+    const bars = barNations.map(n => {
+      const b = nationBuckets[n];
+      const pctN = b.total > 0 ? Math.round(b.owned / b.total * 100) : 0;
+      const full = pctN === 100 ? ' full' : '';
+      return `<div class="mini-bar${full}" title="${n}: ${b.owned}/${b.total} (${pctN}%)">
+        <div class="mini-bar-fill" style="height:${pctN}%"></div>
+        <span class="mini-bar-icon">${NATION_ICONS[n] || '?'}</span>
+      </div>`;
+    }).join('');
+
     filterSummary.innerHTML = `
       <div class="coll-summary-row">
-        <span class="coll-summary-bar-wrap">
-          <span class="coll-summary-bar" style="width:${filtPct}%"></span>
-        </span>
+        <div class="mini-barchart">${bars}</div>
         <span class="coll-summary-text"><strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned${soldSuffix}${soldTotal}</span>
       </div>`;
 
