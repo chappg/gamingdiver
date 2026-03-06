@@ -244,7 +244,7 @@ class WoWSAnalyzer {
 
       // Per-mode breakdown
       if (!s.byMode[type]) {
-        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0 };
+        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0, maxFrags: 0, maxDamage: 0, maxExp: 0 };
       }
       const m = s.byMode[type];
       m.battles += battles;
@@ -256,6 +256,9 @@ class WoWSAnalyzer {
       m.hitsMain += parseInt(row.HITS_BY_MAIN) || 0;
       m.shotsTorp += parseInt(row.SHOTS_BY_TPD) || 0;
       m.hitsTorp += parseInt(row.HITS_BY_TPD) || 0;
+      m.maxFrags = Math.max(m.maxFrags, parseInt(row.MAX_FRAGS) || 0);
+      m.maxDamage = Math.max(m.maxDamage, parseInt(row.MAX_DAMAGE_DEALT) || 0);
+      m.maxExp = Math.max(m.maxExp, parseInt(row.MAX_EXP) || 0);
     }
 
     // Merge in garage status from ship stats
