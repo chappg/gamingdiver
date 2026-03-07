@@ -180,9 +180,10 @@ body {
 .top-filter-row {
   display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
 }
-.top-filter-row-single {
-  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px;
+.top-filter-grid {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-top: 10px;
 }
+.top-filter-right { justify-self: end; }
 .top-filter-inline {
   display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
 }
