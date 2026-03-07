@@ -363,8 +363,7 @@ class Dashboard {
   renderTopShips() {
     const metric = this.currentTopMetric || 'battles';
     const mode = this.currentOverviewMode;
-    const modeBattles = this.r.career.modeStats[mode]?.battles || 0;
-    const minBattles = modeBattles < 1000 ? 1 : 10;
+    const minBattles = 1;
     const filterNation = this.topFilterNation || '';
     const filterTier = this.topFilterTier || '';
     const filterType = this.topFilterType || '';
