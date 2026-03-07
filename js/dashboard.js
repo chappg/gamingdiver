@@ -1048,7 +1048,9 @@ class Dashboard {
       }
     }
 
-    html += '<div class="heatmap-legend"><span class="heatmap-legend-label">Less</span><div class="heatmap-legend-bar">';
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tzAbbr = new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+    html += `<div class="heatmap-legend"><span class="heatmap-legend-label">Times shown in ${tzAbbr}</span><span style="flex:1"></span><span class="heatmap-legend-label">Less</span><div class="heatmap-legend-bar">`;
     for (let i = 0; i <= 4; i++) {
       const c = this.heatmapColor(i / 4) || 'rgba(255,255,255,0.02)';
       html += `<span style="background:${c}"></span>`;
