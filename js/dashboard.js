@@ -42,6 +42,12 @@ const RECOVERY_COST = {
   'V': 15000000, 'VI': 18750000, 'VII': 26250000, 'VIII': 37500000,
 };
 
+// Tech tree ship repurchase prices (silver credits) by tier
+const TECH_TREE_COST = {
+  'I': 0, 'II': 25000, 'III': 130000, 'IV': 700000,
+  'V': 2000000, 'VI': 5000000, 'VII': 9500000, 'VIII': 18000000,
+};
+
 function fmt(n) {
   if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
   if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
@@ -151,7 +157,9 @@ class Dashboard {
   // ---- OVERVIEW TAB ----
   renderOverview() {
     const c = this.r.career;
-    document.getElementById('playerName').textContent = `${c.gamertag}'s Dashboard`;
+    const clan = this.r.account?.clan;
+    const clanTag = clan?.name ? `[${clan.name}] ` : '';
+    document.getElementById('playerName').textContent = `${clanTag}${c.gamertag}'s Dashboard`;
 
     // Build mode tabs for overview
     this.buildModeTabs('overviewModeTabs', this.currentOverviewMode, (mode) => {
@@ -184,6 +192,17 @@ class Dashboard {
       }
     }
 
+    // Clan since card
+    const clan = this.r.account?.clan;
+    let clanSinceCard = '';
+    if (clan?.joinDate) {
+      const d = new Date(clan.joinDate);
+      if (!isNaN(d)) {
+        const monthYear = `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        clanSinceCard = this.statCard(monthYear, 'Clan Since', `[${clan.name}] · ${clan.role}`);
+      }
+    }
+
     cards.innerHTML = [
       this.statCard(fmt(ms.battles), plural(ms.battles, 'Battle'), mode === 'all' ? `${c.totalSessions} sessions` : ''),
       this.statCard(wpct(ms.winRate, ms.battles), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
@@ -194,7 +213,34 @@ class Dashboard {
       this.statCard(pct(ms.mainAccuracy), 'Main Acc.', ''),
       this.statCard(pct(ms.torpAccuracy), 'Torp Acc.', ''),
       playingSinceCard,
+      clanSinceCard,
     ].join('');
+
+    // Account resources
+    const res = c.resources;
+    const resourceCards = document.getElementById('resourceCards');
+    if (resourceCards && res) {
+      const usedSlots = res.shipSlots - res.emptySlots;
+      let premiumLabel = '';
+      if (res.premiumExpiry) {
+        const pDate = new Date(res.premiumExpiry);
+        if (!isNaN(pDate)) {
+          premiumLabel = pDate > new Date()
+            ? `${String(pDate.getMonth() + 1).padStart(2, '0')}/${pDate.getFullYear()}`
+            : 'Expired';
+        }
+      }
+      resourceCards.innerHTML = [
+        this.statCard(fmt(res.credits), '🪙 Credits', ''),
+        this.statCard(fmt(res.doubloons), '💰 Doubloons', ''),
+        this.statCard(fmt(res.freeXP), 'Free XP', ''),
+        this.statCard(fmt(res.eliteXP), 'Elite XP', ''),
+        this.statCard(res.accountLevel.toString(), 'Account Level', ''),
+        premiumLabel ? this.statCard(premiumLabel, 'Premium', premiumLabel === 'Expired' ? '' : 'Active') : '',
+        this.statCard(fmt(res.distance) + ' nm', 'Distance Sailed', ''),
+        this.statCard(`${usedSlots}/${res.shipSlots}`, 'Ship Slots', `${res.emptySlots} empty`),
+      ].join('');
+    }
 
     this.renderTopShips('battles');
     this.setupTopShipsToggle();
@@ -399,16 +445,28 @@ class Dashboard {
     } else {
       eligible = this.r.ships.filter(s => sourceKeys.some(k => s.byMode[k] && s.byMode[k].battles > 0)).map(s => {
         let battles = 0, wins = 0, damage = 0, frags = 0, survived = 0, maxFrags = 0, maxDamage = 0;
+        let scoutingDamage = 0, potentialDamage = 0, shipsSpotted = 0, capPoints = 0, capDropped = 0;
         for (const k of sourceKeys) {
           const d = s.byMode[k];
           if (!d) continue;
           battles += d.battles; wins += d.wins; damage += d.damage; frags += d.frags; survived += d.survived;
           if ((d.maxFrags || 0) > maxFrags) maxFrags = d.maxFrags || 0;
           if ((d.maxDamage || 0) > maxDamage) maxDamage = d.maxDamage || 0;
+          scoutingDamage += d.scoutingDamage || 0;
+          potentialDamage += d.potentialDamage || 0;
+          shipsSpotted += d.shipsSpotted || 0;
+          capPoints += d.capPoints || 0;
+          capDropped += d.capDropped || 0;
         }
         const deaths = battles - survived;
         return {
           ...s, battles, wins, damage, frags, survived, maxFrags, maxDamage,
+          scoutingDamage, potentialDamage, shipsSpotted, capPoints, capDropped,
+          avgSpotDmg: battles > 0 ? Math.round(scoutingDamage / battles) : 0,
+          avgPotentialDmg: battles > 0 ? Math.round(potentialDamage / battles) : 0,
+          avgShipsSpotted: battles > 0 ? (shipsSpotted / battles) : 0,
+          avgCapPoints: battles > 0 ? (capPoints / battles) : 0,
+          avgCapDropped: battles > 0 ? (capDropped / battles) : 0,
           winRate: battles > 0 ? (wins / battles * 100) : 0,
           avgDamage: battles > 0 ? Math.round(damage / battles) : 0,
           kd: deaths > 0 ? (frags / deaths) : frags,
@@ -445,6 +503,15 @@ class Dashboard {
       case 'maxFrags':
         sorted = [...eligible].sort((a, b) => b.maxFrags - a.maxFrags || tierRank(b.tier) - tierRank(a.tier));
         valFn = s => s.maxFrags.toString(); label = 'Max Kills'; break;
+      case 'bestSpotter':
+        sorted = [...eligible].sort((a, b) => (b.avgSpotDmg || 0) - (a.avgSpotDmg || 0));
+        valFn = s => fmt(s.avgSpotDmg || 0); label = 'Avg Spot Dmg'; break;
+      case 'bestTank':
+        sorted = [...eligible].sort((a, b) => (b.avgPotentialDmg || 0) - (a.avgPotentialDmg || 0));
+        valFn = s => fmt(s.avgPotentialDmg || 0); label = 'Avg Potential'; break;
+      case 'capWarrior':
+        sorted = [...eligible].sort((a, b) => (b.avgCapPoints || 0) - (a.avgCapPoints || 0));
+        valFn = s => (s.avgCapPoints || 0).toFixed(0); label = 'Cap Points'; break;
       case 'leastBattles':
         sorted = [...eligible].sort((a, b) => a.battles - b.battles);
         valFn = s => s.battles.toLocaleString(); label = 'Battles'; break;
@@ -642,12 +709,15 @@ class Dashboard {
         // Merge stats from all source modes
         let battles = 0, wins = 0, damage = 0, frags = 0, survived = 0;
         let shotsMain = 0, hitsMain = 0, shotsTorp = 0, hitsTorp = 0;
+        let scoutingDamage = 0, potentialDamage = 0, shipsSpotted = 0, capPoints = 0, capDropped = 0;
         for (const k of sourceKeys) {
           const d = s.byMode[k];
           if (!d) continue;
           battles += d.battles; wins += d.wins; damage += d.damage; frags += d.frags; survived += d.survived;
           shotsMain += (d.shotsMain || 0); hitsMain += (d.hitsMain || 0);
           shotsTorp += (d.shotsTorp || 0); hitsTorp += (d.hitsTorp || 0);
+          scoutingDamage += (d.scoutingDamage || 0); potentialDamage += (d.potentialDamage || 0);
+          shipsSpotted += (d.shipsSpotted || 0); capPoints += (d.capPoints || 0); capDropped += (d.capDropped || 0);
         }
         const deaths = battles - survived;
         return {
@@ -660,6 +730,9 @@ class Dashboard {
           mainAccuracy: shotsMain > 0 ? (hitsMain / shotsMain * 100) : 0,
           torpAccuracy: shotsTorp > 0 ? (hitsTorp / shotsTorp * 100) : 0,
           shotsTorp,
+          avgSpotDmg: battles > 0 ? Math.round(scoutingDamage / battles) : 0,
+          avgPotentialDmg: battles > 0 ? Math.round(potentialDamage / battles) : 0,
+          avgCapPoints: battles > 0 ? (capPoints / battles) : 0,
         };
       });
     }
@@ -701,6 +774,8 @@ class Dashboard {
         <td class="num">${pct(s.survivalRate)}</td>
         <td class="num">${pct(s.mainAccuracy)}</td>
         <td class="num">${(s.shotsTorp || 0) > 0 ? pct(s.torpAccuracy) : '-'}</td>
+        <td class="num">${fmt(s.avgSpotDmg || 0)}</td>
+        <td class="num">${fmt(s.avgPotentialDmg || 0)}</td>
       </tr>
     `).join('');
 
@@ -994,9 +1069,21 @@ class Dashboard {
 
     // Tag rentals and sold ships
     for (const s of ships) {
-      s.isRental = /rental/i.test(s.name) || /rental/i.test(s.internal);
-      s.sold = s.premium && !s.inGarage && s.battles > 0 && !s.isRental;
-      s.recoveryCost = s.sold ? (RECOVERY_COST[s.tier] || null) : null;
+      s.isRental = s.internal?.endsWith('_R') || /rental/i.test(s.name);
+      s.sold = !s.inGarage && s.battles > 0 && !s.isRental;
+      if (s.sold && s.premium) {
+        s.recoveryCost = RECOVERY_COST[s.tier] || null;
+        s.repurchaseCost = null;
+        s.soldType = 'premium';
+      } else if (s.sold && !s.premium) {
+        s.recoveryCost = null;
+        s.repurchaseCost = TECH_TREE_COST[s.tier] ?? null;
+        s.soldType = 'techTree';
+      } else {
+        s.recoveryCost = null;
+        s.repurchaseCost = null;
+        s.soldType = null;
+      }
     }
 
     // Exclude rentals from all completion totals
@@ -1004,14 +1091,17 @@ class Dashboard {
 
     const owned = nonRental.filter(s => s.inGarage).length;
     const sold = nonRental.filter(s => s.sold);
-    const totalRecoveryCost = sold.reduce((sum, s) => sum + (s.recoveryCost || 0), 0);
+    const premiumSold = sold.filter(s => s.soldType === 'premium');
+    const techTreeSold = sold.filter(s => s.soldType === 'techTree');
+    const totalRecoveryCost = premiumSold.reduce((sum, s) => sum + (s.recoveryCost || 0), 0);
+    const totalRepurchaseCost = techTreeSold.reduce((sum, s) => sum + (s.repurchaseCost || 0), 0);
     const techTree = nonRental.filter(s => !s.premium);
     const premiums = nonRental.filter(s => s.premium);
     const completion = {
       all: { owned, total: nonRental.length },
       techTree: { owned: techTree.filter(s => s.inGarage).length, total: techTree.length },
       premium: { owned: premiums.filter(s => s.inGarage).length, total: premiums.length },
-      sold: { count: sold.length, totalCost: totalRecoveryCost },
+      sold: { count: sold.length, premiumCount: premiumSold.length, techTreeCount: techTreeSold.length, totalRecoveryCost, totalRepurchaseCost },
       byNation: {},
     };
     const nations = [...new Set(nonRental.map(s => s.nation))].sort();
@@ -1035,9 +1125,13 @@ class Dashboard {
     const pct = (o, t) => t > 0 ? Math.round(o / t * 100) : 0;
 
     const statsEl = document.getElementById('collectionStats');
-    const soldStats = c.sold.count > 0
-      ? `<div class="collection-stat sold-stat"><span class="cs-num">${c.sold.count}</span><span class="cs-label">Sold (${fmt(c.sold.totalCost)} 🪙 to recover)</span></div>`
-      : '';
+    let soldStats = '';
+    if (c.sold.count > 0) {
+      const parts = [];
+      if (c.sold.premiumCount > 0) parts.push(`${c.sold.premiumCount} premium (${fmt(c.sold.totalRecoveryCost)} 🪙 recovery)`);
+      if (c.sold.techTreeCount > 0) parts.push(`${c.sold.techTreeCount} tech tree (${fmt(c.sold.totalRepurchaseCost)} 🪙 repurchase)`);
+      soldStats = `<div class="collection-stat sold-stat"><span class="cs-num">${c.sold.count}</span><span class="cs-label">Sold — ${parts.join(' · ')}</span></div>`;
+    }
     statsEl.innerHTML = [
       `<div class="collection-stat"><span class="cs-num">${c.all.owned}</span><span class="cs-label">Ships Owned</span></div>`,
       `<div class="collection-stat"><span class="cs-num">${pct(c.all.owned, c.all.total)}%</span><span class="cs-label">Complete (${c.all.owned}/${c.all.total})</span></div>`,
@@ -1118,6 +1212,17 @@ class Dashboard {
     document.getElementById('collFilterOwned')?.addEventListener('change', () => this.renderCollectionGrid());
     // Show Rentals checkbox
     document.getElementById('collFilterRentals')?.addEventListener('change', () => this.renderCollectionGrid());
+
+    // Sort buttons
+    this.collSort = 'name';
+    document.querySelectorAll('#collSortButtons .tier-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#collSortButtons .tier-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.collSort = btn.dataset.sort;
+        this.renderCollectionGrid();
+      });
+    });
   }
 
   renderCollectionGrid() {
@@ -1138,6 +1243,13 @@ class Dashboard {
     if (type === 'sold') ships = ships.filter(s => s.sold);
     if (ownedOnly) ships = ships.filter(s => s.inGarage);
 
+    // Sort
+    const sortKey = this.collSort || 'name';
+    if (sortKey === 'tier') ships.sort((a, b) => tierRank(b.tier) - tierRank(a.tier) || a.name.localeCompare(b.name));
+    else if (sortKey === 'battles') ships.sort((a, b) => b.battles - a.battles || a.name.localeCompare(b.name));
+    else if (sortKey === 'exp') ships.sort((a, b) => (b.exp || 0) - (a.exp || 0) || a.name.localeCompare(b.name));
+    else ships.sort((a, b) => a.name.localeCompare(b.name));
+
     // Show filtered completion summary
     const ownedCount = ships.filter(s => s.inGarage).length;
     const totalCount = ships.length;
@@ -1153,8 +1265,10 @@ class Dashboard {
     const soldSuffix = soldCount > 0 && type !== 'sold'
       ? ` · <span style="color:var(--orange)">${soldCount} sold</span>`
       : '';
+    const totalXP = ships.reduce((sum, s) => sum + (s.exp || 0), 0);
+    const xpSuffix = totalXP > 0 ? ` · ${fmt(totalXP)} XP` : '';
     const soldTotal = type === 'sold'
-      ? ` — 🪙 ${fmt(ships.reduce((sum, s) => sum + (s.recoveryCost || 0), 0))} total recovery cost`
+      ? ` — 🪙 ${fmt(ships.filter(s => s.soldType === 'premium').reduce((sum, s) => sum + (s.recoveryCost || 0), 0))} recovery + ${fmt(ships.filter(s => s.soldType === 'techTree').reduce((sum, s) => sum + (s.repurchaseCost || 0), 0))} repurchase`
       : '';
     // Build mini bar chart — per-nation completion from filtered ships
     const nationBuckets = {};
@@ -1178,20 +1292,24 @@ class Dashboard {
     filterSummary.innerHTML = `
       <div class="coll-summary-row">
         <div class="mini-barchart">${bars}</div>
-        <span class="coll-summary-text"><strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned${soldSuffix}${soldTotal}</span>
+        <span class="coll-summary-text"><strong>${filtPct}% Complete</strong> — ${ownedCount} of ${totalCount} ships owned${soldSuffix}${xpSuffix}${soldTotal}</span>
       </div>`;
 
     const grid = document.getElementById('collectionGrid');
     grid.innerHTML = ships.map(s => {
       const statusClass = s.inGarage ? '' : s.sold ? 'sold' : 'not-owned';
-      const statusLabel = s.inGarage
-        ? '<span class="sc-stat" style="color:var(--green)">✓ Owned</span>'
-        : s.sold
-          ? '<span class="sc-stat" style="color:var(--orange)">⚠ Sold</span>'
-          : '<span class="sc-stat" style="color:var(--text-dim)">Not owned</span>';
-      const recoveryCost = s.sold && s.recoveryCost
-        ? `<div class="sc-recovery">🪙 ${fmt(s.recoveryCost)} to recover</div>`
-        : '';
+      let statusLabel, costLine = '';
+      if (s.inGarage) {
+        statusLabel = '<span class="sc-stat" style="color:var(--green)">✓ Owned</span>';
+      } else if (s.sold && s.soldType === 'premium') {
+        statusLabel = '<span class="sc-stat" style="color:var(--orange)">⚠ Sold</span>';
+        if (s.recoveryCost) costLine = `<div class="sc-recovery">🪙 ${fmt(s.recoveryCost)} recovery ticket</div>`;
+      } else if (s.sold && s.soldType === 'techTree') {
+        statusLabel = '<span class="sc-stat" style="color:var(--accent)">↩ Sold</span>';
+        if (s.repurchaseCost != null) costLine = `<div class="sc-recovery">🪙 ${fmt(s.repurchaseCost)} to repurchase</div>`;
+      } else {
+        statusLabel = '<span class="sc-stat" style="color:var(--text-dim)">Not owned</span>';
+      }
       return `
       <div class="ship-card ${statusClass}">
         <div class="sc-name"><span class="tier-badge">${s.tier}</span>${s.name}</div>
@@ -1200,7 +1318,8 @@ class Dashboard {
           <span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> ${plural(s.battles, 'battle')}</span>
           ${statusLabel}
         </div>
-        ${recoveryCost}
+        ${costLine}
+        ${s.exp > 0 ? `<div class="sc-meta" style="margin-top:2px">${s.exp.toLocaleString()} XP</div>` : ''}
         ${s.lastBattle ? `<div class="sc-meta" style="margin-top:4px">Last: ${s.lastBattle.substring(0, 10)}</div>` : ''}
       </div>`;
     }).join('');

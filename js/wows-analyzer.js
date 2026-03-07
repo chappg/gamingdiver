@@ -87,7 +87,16 @@ class WoWSAnalyzer {
     const row = info[0] || {};
     // Try common column name variants
     const activated = row.ACTIVATED_AT || row.Activated_At || row.activated_at || '';
-    return { activatedAt: activated };
+
+    // Clan data
+    const clans = this.data['Clans'] || [];
+    let clan = null;
+    if (clans.length > 0) {
+      const c = clans[clans.length - 1]; // latest clan entry
+      clan = { name: c.CLAN_NAME || '', role: c.ROLE_NAME || '', joinDate: c.CREATED_AT || '' };
+    }
+
+    return { activatedAt: activated, clan };
   }
 
   analyzeCareer() {
@@ -191,6 +200,19 @@ class WoWSAnalyzer {
       totalPlayTimeMin += (end - start) / 60000;
     }
 
+    // Account resources
+    const resources = {
+      credits: parseInt(acct.CREDITS) || 0,
+      doubloons: parseInt(acct.GOLD) || 0,
+      freeXP: parseInt(acct.FREE_XP) || 0,
+      eliteXP: parseInt(acct.ELITE_XP) || 0,
+      premiumExpiry: acct.PREMIUM_EXPIRY_TIME || '',
+      accountLevel: parseInt(acct.LEVELING_TIER) || 0,
+      distance: parseInt(acct.DISTANCE) || 0,
+      shipSlots: parseInt(acct.SLOTS) || 0,
+      emptySlots: parseInt(acct.EMPTY_SLOTS) || 0,
+    };
+
     return {
       gamertag: info.GAMERTAG || acct.NAME || 'Commander',
       totalPlayTimeHours: Math.round(totalPlayTimeMin / 60),
@@ -198,6 +220,7 @@ class WoWSAnalyzer {
       avgSessionMin: sessions.length > 0 ? Math.round(totalPlayTimeMin / sessions.length) : 0,
       firstSession, lastSession,
       modeStats,
+      resources,
     };
   }
 
@@ -225,6 +248,9 @@ class WoWSAnalyzer {
           shotsAtba: 0, hitsAtba: 0,
           fragsByMain: 0, fragsByTorp: 0, fragsByAtba: 0, fragsByRam: 0,
           maxDamage: 0, maxFrags: 0, maxExp: 0,
+          scoutingDamage: 0, potentialDamage: 0, shipsSpotted: 0,
+          maxScoutingDamage: 0, maxPotentialDamage: 0, maxShipsSpotted: 0,
+          capPoints: 0, capDropped: 0,
           byMode: {},
         };
       }
@@ -250,10 +276,18 @@ class WoWSAnalyzer {
       s.maxDamage = Math.max(s.maxDamage, parseInt(row.MAX_DAMAGE_DEALT) || 0);
       s.maxFrags = Math.max(s.maxFrags, parseInt(row.MAX_FRAGS) || 0);
       s.maxExp = Math.max(s.maxExp, parseInt(row.MAX_EXP) || 0);
+      s.scoutingDamage += parseInt(row.SCOUTING_DAMAGE) || 0;
+      s.potentialDamage += (parseInt(row.ART_AGRO) || 0) + (parseInt(row.TPD_AGRO) || 0);
+      s.shipsSpotted += parseInt(row.SHIPS_SPOTTED) || 0;
+      s.maxScoutingDamage = Math.max(s.maxScoutingDamage, parseInt(row.MAX_SCOUTING_DAMAGE) || 0);
+      s.maxPotentialDamage = Math.max(s.maxPotentialDamage, parseInt(row.MAX_TOTAL_AGRO) || 0);
+      s.maxShipsSpotted = Math.max(s.maxShipsSpotted, parseInt(row.MAX_SHIPS_SPOTTED) || 0);
+      s.capPoints += parseInt(row.CONTROL_CAPTURED_POINTS) || 0;
+      s.capDropped += parseInt(row.CONTROL_DROPPED_POINTS) || 0;
 
       // Per-mode breakdown
       if (!s.byMode[type]) {
-        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0, maxFrags: 0, maxDamage: 0, maxExp: 0 };
+        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0, maxFrags: 0, maxDamage: 0, maxExp: 0, scoutingDamage: 0, potentialDamage: 0, shipsSpotted: 0, capPoints: 0, capDropped: 0 };
       }
       const m = s.byMode[type];
       m.battles += battles;
@@ -268,6 +302,11 @@ class WoWSAnalyzer {
       m.maxFrags = Math.max(m.maxFrags, parseInt(row.MAX_FRAGS) || 0);
       m.maxDamage = Math.max(m.maxDamage, parseInt(row.MAX_DAMAGE_DEALT) || 0);
       m.maxExp = Math.max(m.maxExp, parseInt(row.MAX_EXP) || 0);
+      m.scoutingDamage += parseInt(row.SCOUTING_DAMAGE) || 0;
+      m.potentialDamage += (parseInt(row.ART_AGRO) || 0) + (parseInt(row.TPD_AGRO) || 0);
+      m.shipsSpotted += parseInt(row.SHIPS_SPOTTED) || 0;
+      m.capPoints += parseInt(row.CONTROL_CAPTURED_POINTS) || 0;
+      m.capDropped += parseInt(row.CONTROL_DROPPED_POINTS) || 0;
     }
 
     // Merge in garage status from ship stats
@@ -290,6 +329,11 @@ class WoWSAnalyzer {
         survivalRate: s.battles > 0 ? (s.survived / s.battles * 100) : 0,
         mainAccuracy: s.shotsMain > 0 ? (s.hitsMain / s.shotsMain * 100) : 0,
         torpAccuracy: s.shotsTorp > 0 ? (s.hitsTorp / s.shotsTorp * 100) : 0,
+        avgSpotDmg: s.battles > 0 ? Math.round(s.scoutingDamage / s.battles) : 0,
+        avgPotentialDmg: s.battles > 0 ? Math.round(s.potentialDamage / s.battles) : 0,
+        avgShipsSpotted: s.battles > 0 ? (s.shipsSpotted / s.battles) : 0,
+        avgCapPoints: s.battles > 0 ? (s.capPoints / s.battles) : 0,
+        avgCapDropped: s.battles > 0 ? (s.capDropped / s.battles) : 0,
       };
     });
 

@@ -212,6 +212,7 @@ body {
 }
 .toggle-btn:hover { border-color: var(--accent-dim); color: var(--text); }
 .toggle-btn.active { background: rgba(0,229,255,0.12); border-color: var(--accent); color: var(--accent); }
+.coll-sort-label { font-size: 0.85em; color: var(--text-dim); margin-left: 12px; }
 .top-ships-summary {
   margin-bottom: 12px; padding: 10px 14px; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.15); border-radius: 8px;
 }
