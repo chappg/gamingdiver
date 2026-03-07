@@ -57,6 +57,7 @@ function fmtKd(kd, battles) {
   if (battles >= 1000) return kd.toFixed(3);
   return kd.toFixed(2);
 }
+function plural(n, singular, pluralForm) { return n === 1 ? singular : (pluralForm || singular + 's'); }
 function winClass(wr) {
   if (wr >= 55) return 'win-high';
   if (wr >= 50) return 'win-mid';
@@ -166,7 +167,7 @@ class Dashboard {
     }
 
     cards.innerHTML = [
-      this.statCard(fmt(ms.battles), 'Battles', mode === 'all' ? `${c.totalSessions} sessions` : ''),
+      this.statCard(fmt(ms.battles), plural(ms.battles, 'Battle'), mode === 'all' ? `${c.totalSessions} sessions` : ''),
       this.statCard(wpct(ms.winRate, ms.battles), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
       this.statCard(fmt(ms.avgDamage), 'Avg Damage', `${fmt(ms.damage)} total`),
       this.statCard(fmtKd(ms.kd, ms.battles), 'K/D Ratio', `${fmt(ms.frags)} kills`),
@@ -440,7 +441,7 @@ class Dashboard {
           <div class="top-ship-rank ${rankCls}">${i + 1}</div>
           <div class="top-ship-info">
             <div class="top-ship-name"><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</div>
-            <div class="top-ship-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} • ${s.battles} battles</div>
+            <div class="top-ship-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} • ${s.battles} ${plural(s.battles, 'battle')}</div>
           </div>
           <div class="top-ship-stat">
             <div class="ts-val">${valFn(s)}</div>
