@@ -764,7 +764,7 @@ class Dashboard {
       <div class="snapshot-summary">
         <h3>📈 Performance Trends <span class="snapshot-count">(${snaps.length} snapshots)</span></h3>
         <div class="snapshot-latest">
-          <div class="snapshot-period">Latest: ${fmtDate(latest.from)} → ${fmtDate(latest.to)} · ${latest.battles} battles</div>
+          <div class="snapshot-period">Latest: ${fmtDate(latest.from)} → ${fmtDate(latest.to)} · ${latest.battles} ${plural(latest.battles, 'battle')}</div>
           <div class="stat-cards">
             ${this.statCard(wpct(latest.winRate, latest.battles), 'Win Rate' + trend(wrVals),
               prevP ? delta(latest.winRate, prevP.winRate, n => n.toFixed(2), '%') : '')}
@@ -1156,7 +1156,7 @@ class Dashboard {
         <div class="sc-name"><span class="tier-badge">${s.tier}</span>${s.name}</div>
         <div class="sc-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} ${s.premium ? '• Premium' : ''}</div>
         <div class="sc-stats">
-          <span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> battles</span>
+          <span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> ${plural(s.battles, 'battle')}</span>
           ${statusLabel}
         </div>
         ${recoveryCost}
