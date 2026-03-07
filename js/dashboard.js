@@ -398,16 +398,17 @@ class Dashboard {
       eligible = this.r.ships.filter(s => s.battles >= minBattles);
     } else {
       eligible = this.r.ships.filter(s => sourceKeys.some(k => s.byMode[k] && s.byMode[k].battles > 0)).map(s => {
-        let battles = 0, wins = 0, damage = 0, frags = 0, survived = 0, maxFrags = 0;
+        let battles = 0, wins = 0, damage = 0, frags = 0, survived = 0, maxFrags = 0, maxDamage = 0;
         for (const k of sourceKeys) {
           const d = s.byMode[k];
           if (!d) continue;
           battles += d.battles; wins += d.wins; damage += d.damage; frags += d.frags; survived += d.survived;
           if ((d.maxFrags || 0) > maxFrags) maxFrags = d.maxFrags || 0;
+          if ((d.maxDamage || 0) > maxDamage) maxDamage = d.maxDamage || 0;
         }
         const deaths = battles - survived;
         return {
-          ...s, battles, wins, damage, frags, survived, maxFrags,
+          ...s, battles, wins, damage, frags, survived, maxFrags, maxDamage,
           winRate: battles > 0 ? (wins / battles * 100) : 0,
           avgDamage: battles > 0 ? Math.round(damage / battles) : 0,
           kd: deaths > 0 ? (frags / deaths) : frags,
@@ -438,6 +439,9 @@ class Dashboard {
       case 'kd':
         sorted = [...eligible].sort((a, b) => b.kd - a.kd);
         valFn = s => fmtKd(s.kd, s.battles); label = 'K/D'; break;
+      case 'maxDamage':
+        sorted = [...eligible].sort((a, b) => (b.maxDamage || 0) - (a.maxDamage || 0));
+        valFn = s => fmt(s.maxDamage || 0); label = 'Max Dmg'; break;
       case 'maxFrags':
         sorted = [...eligible].sort((a, b) => b.maxFrags - a.maxFrags || tierRank(b.tier) - tierRank(a.tier));
         valFn = s => s.maxFrags.toString(); label = 'Max Kills'; break;
