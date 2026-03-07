@@ -370,6 +370,7 @@ class Dashboard {
     this.topFilterNation = '';
     this.topFilterTier = '';
     this.topFilterType = '';
+    this.topFilterClass = '';
     this.shipFilterNation = '';
     this.shipFilterTier = '';
     this.shipFilterClass = '';
@@ -421,6 +422,20 @@ class Dashboard {
       });
     });
 
+    // Build class buttons for Top Ships
+    const topClasses = [...new Set(ships.map(s => s.class))].sort();
+    const topClassBox = document.getElementById('topClassButtons');
+    topClassBox.innerHTML = `<button class="tier-btn active" data-class="">All</button>` +
+      topClasses.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)}</button>`).join('');
+    topClassBox.querySelectorAll('.tier-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        topClassBox.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.topFilterClass = btn.dataset.class;
+        this.renderTopShips();
+      });
+    });
+
     // Metric toggle buttons
     document.querySelectorAll('#topShipsToggle .toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -439,6 +454,7 @@ class Dashboard {
     const filterNation = this.topFilterNation || '';
     const filterTier = this.topFilterTier || '';
     const filterType = this.topFilterType || '';
+    const filterClass = this.topFilterClass || '';
 
     // Get ship stats for current mode (handle synthetic types like 'standard_all')
     const sourceKeys = (typeof mode === 'string' && SYNTHETIC_TYPES[mode])
@@ -486,6 +502,7 @@ class Dashboard {
     if (filterTier) eligible = eligible.filter(s => s.tier === filterTier);
     if (filterType === 'tech') eligible = eligible.filter(s => !s.premium);
     if (filterType === 'premium') eligible = eligible.filter(s => s.premium);
+    if (filterClass) eligible = eligible.filter(s => s.class === filterClass);
 
     let sorted, valFn, label;
     switch (metric) {
@@ -549,6 +566,7 @@ class Dashboard {
         if (filterNation) parts.push(filterNation);
         if (filterType === 'tech') parts.push('Tech Tree');
         else if (filterType === 'premium') parts.push('Premium');
+        if (filterClass) parts.push(filterClass);
         if (filterTier) parts.push('Tier ' + filterTier);
         const filterLabel = parts.length ? parts.join(' · ') : 'All Ships';
 
