@@ -660,7 +660,7 @@ class Dashboard {
     const classes = [...new Set(ships.map(s => s.class))].sort();
     const classBox = document.getElementById('shipClassButtons');
     classBox.innerHTML = `<button class="tier-btn active" data-class="">All</button>` +
-      classes.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)} ${c}</button>`).join('');
+      classes.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)}</button>`).join('');
     classBox.querySelectorAll('.tier-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         classBox.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
@@ -1201,7 +1201,7 @@ class Dashboard {
     const classes = [...new Set(ships.map(s => s.class))].sort();
     const classBox = document.getElementById('collClassButtons');
     classBox.innerHTML = `<button class="tier-btn active" data-class="">All</button>` +
-      classes.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)} ${c}</button>`).join('');
+      classes.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)}</button>`).join('');
     classBox.querySelectorAll('.tier-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         classBox.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
