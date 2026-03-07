@@ -1,5 +1,15 @@
 // Dashboard rendering — builds all charts and tables from analyzer results
 
+// Ship class SVG icons (white, 16x16)
+const CLASS_SVG = {
+  'Battleship': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><path d="M8 1L1 8l7 7 7-7L8 1zM8 3.5L12.5 8 8 12.5 3.5 8 8 3.5z"/><path d="M8 5.5L5.5 8 8 10.5 10.5 8 8 5.5z"/></svg>',
+  'Cruiser': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><path d="M8 2L2 8l6 6 6-6-6-6zM8 4.5L11.5 8 8 11.5 4.5 8 8 4.5z"/></svg>',
+  'Destroyer': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><path d="M8 4L4 8l4 4 4-4-4-4z"/></svg>',
+  'Carrier': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><path d="M8 1L1 8l7 7 7-7L8 1zM8 3.5L12.5 8 8 12.5 3.5 8 8 3.5z"/><rect x="7" y="5" width="2" height="6"/><rect x="5" y="7" width="6" height="2"/></svg>',
+  'Aircraft Carrier': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><path d="M8 1L1 8l7 7 7-7L8 1zM8 3.5L12.5 8 8 12.5 3.5 8 8 3.5z"/><rect x="7" y="5" width="2" height="6"/><rect x="5" y="7" width="6" height="2"/></svg>',
+};
+function classIcon(cls) { return CLASS_SVG[cls] || ''; }
+
 const CHART_COLORS = {
   accent: '#00e5ff', accent2: '#00b0ff', dim: '#0088aa',
   green: '#4caf50', red: '#ef5350', orange: '#ff9800', purple: '#ab47bc',
@@ -567,7 +577,7 @@ class Dashboard {
           <div class="top-ship-rank ${rankCls}">${i + 1}</div>
           <div class="top-ship-info">
             <div class="top-ship-name"><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</div>
-            <div class="top-ship-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} • ${s.battles} ${plural(s.battles, 'battle')}</div>
+            <div class="top-ship-meta">${flagIcon(s.nation)} ${s.nation} • ${classIcon(s.class)} ${s.class} • ${s.battles} ${plural(s.battles, 'battle')}</div>
           </div>
           <div class="top-ship-stat">
             <div class="ts-val">${valFn(s)}</div>
@@ -647,11 +657,10 @@ class Dashboard {
     });
 
     // Build class buttons
-    const CLASS_ICONS = { 'Battleship': '⚓', 'Cruiser': '🛡️', 'Destroyer': '💨', 'Carrier': '✈️' };
     const classes = [...new Set(ships.map(s => s.class))].sort();
     const classBox = document.getElementById('shipClassButtons');
     classBox.innerHTML = `<button class="tier-btn active" data-class="">All</button>` +
-      classes.map(c => `<button class="tier-btn" data-class="${c}">${CLASS_ICONS[c] || ''} ${c}</button>`).join('');
+      classes.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)} ${c}</button>`).join('');
     classBox.querySelectorAll('.tier-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         classBox.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
@@ -768,7 +777,7 @@ class Dashboard {
       <tr>
         <td><span class="tier-badge">${s.tier}</span>${s.name}${s.premium ? ' ★' : ''}</td>
         <td>${flagIcon(s.nation)} ${s.nation}</td>
-        <td>${s.class}</td>
+        <td>${classIcon(s.class)}</td>
         <td class="num">${s.battles.toLocaleString()}</td>
         <td class="num ${winClass(s.winRate)}">${wpct(s.winRate, s.battles)}</td>
         <td class="num">${s.avgDamage.toLocaleString()}</td>
@@ -1189,11 +1198,10 @@ class Dashboard {
     });
 
     // Class buttons
-    const CLASS_ICONS = { 'Battleship': '⚓', 'Cruiser': '🛡️', 'Destroyer': '💨', 'Carrier': '✈️' };
     const classes = [...new Set(ships.map(s => s.class))].sort();
     const classBox = document.getElementById('collClassButtons');
     classBox.innerHTML = `<button class="tier-btn active" data-class="">All</button>` +
-      classes.map(c => `<button class="tier-btn" data-class="${c}">${CLASS_ICONS[c] || ''} ${c}</button>`).join('');
+      classes.map(c => `<button class="tier-btn" data-class="${c}">${classIcon(c)} ${c}</button>`).join('');
     classBox.querySelectorAll('.tier-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         classBox.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
@@ -1320,7 +1328,7 @@ class Dashboard {
       return `
       <div class="ship-card ${statusClass}">
         <div class="sc-name"><span class="tier-badge">${s.tier}</span>${s.name}</div>
-        <div class="sc-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} ${s.premium ? '• Premium' : ''}</div>
+        <div class="sc-meta">${flagIcon(s.nation)} ${s.nation} • ${classIcon(s.class)} ${s.premium ? '• Premium' : ''}</div>
         <div class="sc-stats">
           ${s.battles > 0 ? `<span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> ${plural(s.battles, 'battle')}</span>` : ''}
           ${statusLabel}
