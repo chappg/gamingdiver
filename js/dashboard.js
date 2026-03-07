@@ -158,8 +158,9 @@ class Dashboard {
   renderOverview() {
     const c = this.r.career;
     const clan = this.r.account?.clan;
-    const clanTag = clan?.name ? `[${clan.name}] ` : '';
-    document.getElementById('playerName').textContent = `${clanTag}${c.gamertag}'s Dashboard`;
+    const clanTag = clan?.name ? `[${clan.name}]` : '';
+    const displayName = c.gamertag.replace(/-x$/i, '');
+    document.getElementById('playerName').textContent = `${clanTag}${displayName}'s Dashboard`;
 
     // Build mode tabs for overview
     this.buildModeTabs('overviewModeTabs', this.currentOverviewMode, (mode) => {
@@ -231,11 +232,10 @@ class Dashboard {
         }
       }
       resourceCards.innerHTML = [
-        this.statCard(fmt(res.credits), '🪙 Credits', ''),
         this.statCard(fmt(res.doubloons), '💰 Doubloons', ''),
-        this.statCard(fmt(res.freeXP), 'Free XP', ''),
+        this.statCard(fmt(res.credits), '🪙 Silver', ''),
+        this.statCard(fmt(res.freeXP), 'Global XP', ''),
         this.statCard(fmt(res.eliteXP), 'Elite XP', ''),
-        this.statCard(res.accountLevel.toString(), 'Account Level', ''),
         premiumLabel ? this.statCard(premiumLabel, 'Premium', premiumLabel === 'Expired' ? '' : 'Active') : '',
         this.statCard(fmt(res.distance) + ' nm', 'Distance Sailed', ''),
         this.statCard(`${usedSlots}/${res.shipSlots}`, 'Ship Slots', `${res.emptySlots} empty`),
@@ -733,6 +733,8 @@ class Dashboard {
           avgSpotDmg: battles > 0 ? Math.round(scoutingDamage / battles) : 0,
           avgPotentialDmg: battles > 0 ? Math.round(potentialDamage / battles) : 0,
           avgCapPoints: battles > 0 ? (capPoints / battles) : 0,
+          avgExp: battles > 0 ? Math.round(sourceKeys.reduce((sum, k) => sum + (s.byMode[k]?.totalExp || 0), 0) / battles) : 0,
+          maxExp: Math.max(...sourceKeys.map(k => s.byMode[k]?.maxExp || 0)),
         };
       });
     }
@@ -776,6 +778,9 @@ class Dashboard {
         <td class="num">${(s.shotsTorp || 0) > 0 ? pct(s.torpAccuracy) : '-'}</td>
         <td class="num">${fmt(s.avgSpotDmg || 0)}</td>
         <td class="num">${fmt(s.avgPotentialDmg || 0)}</td>
+        <td class="num">${fmt(s.avgExp || 0)}</td>
+        <td class="num">${fmt(s.maxExp || 0)}</td>
+        <td class="num">${s.lastBattle ? s.lastBattle.substring(0, 10) : '-'}</td>
       </tr>
     `).join('');
 

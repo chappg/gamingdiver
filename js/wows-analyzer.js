@@ -247,7 +247,7 @@ class WoWSAnalyzer {
           shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0,
           shotsAtba: 0, hitsAtba: 0,
           fragsByMain: 0, fragsByTorp: 0, fragsByAtba: 0, fragsByRam: 0,
-          maxDamage: 0, maxFrags: 0, maxExp: 0,
+          maxDamage: 0, maxFrags: 0, maxExp: 0, totalExp: 0,
           scoutingDamage: 0, potentialDamage: 0, shipsSpotted: 0,
           maxScoutingDamage: 0, maxPotentialDamage: 0, maxShipsSpotted: 0,
           capPoints: 0, capDropped: 0,
@@ -276,6 +276,7 @@ class WoWSAnalyzer {
       s.maxDamage = Math.max(s.maxDamage, parseInt(row.MAX_DAMAGE_DEALT) || 0);
       s.maxFrags = Math.max(s.maxFrags, parseInt(row.MAX_FRAGS) || 0);
       s.maxExp = Math.max(s.maxExp, parseInt(row.MAX_EXP) || 0);
+      s.totalExp += parseInt(row.ORIGINAL_EXP) || 0;
       s.scoutingDamage += parseInt(row.SCOUTING_DAMAGE) || 0;
       s.potentialDamage += (parseInt(row.ART_AGRO) || 0) + (parseInt(row.TPD_AGRO) || 0);
       s.shipsSpotted += parseInt(row.SHIPS_SPOTTED) || 0;
@@ -287,7 +288,7 @@ class WoWSAnalyzer {
 
       // Per-mode breakdown
       if (!s.byMode[type]) {
-        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0, maxFrags: 0, maxDamage: 0, maxExp: 0, scoutingDamage: 0, potentialDamage: 0, shipsSpotted: 0, capPoints: 0, capDropped: 0 };
+        s.byMode[type] = { battles: 0, wins: 0, damage: 0, frags: 0, survived: 0, shotsMain: 0, hitsMain: 0, shotsTorp: 0, hitsTorp: 0, maxFrags: 0, maxDamage: 0, maxExp: 0, totalExp: 0, scoutingDamage: 0, potentialDamage: 0, shipsSpotted: 0, capPoints: 0, capDropped: 0 };
       }
       const m = s.byMode[type];
       m.battles += battles;
@@ -302,6 +303,7 @@ class WoWSAnalyzer {
       m.maxFrags = Math.max(m.maxFrags, parseInt(row.MAX_FRAGS) || 0);
       m.maxDamage = Math.max(m.maxDamage, parseInt(row.MAX_DAMAGE_DEALT) || 0);
       m.maxExp = Math.max(m.maxExp, parseInt(row.MAX_EXP) || 0);
+      m.totalExp += parseInt(row.ORIGINAL_EXP) || 0;
       m.scoutingDamage += parseInt(row.SCOUTING_DAMAGE) || 0;
       m.potentialDamage += (parseInt(row.ART_AGRO) || 0) + (parseInt(row.TPD_AGRO) || 0);
       m.shipsSpotted += parseInt(row.SHIPS_SPOTTED) || 0;
@@ -309,12 +311,12 @@ class WoWSAnalyzer {
       m.capDropped += parseInt(row.CONTROL_DROPPED_POINTS) || 0;
     }
 
-    // Merge in garage status from ship stats
+    // Merge in garage status and metadata from ship stats
     for (const row of shipStats) {
       const vname = row.VEHICLE_NAME;
       if (shipMap[vname]) {
         shipMap[vname].inGarage = row.IN_GARAGE === '1';
-        shipMap[vname].lastBattle = row.LAST_BATTLE_TIME;
+        shipMap[vname].lastBattle = row.LAST_BATTLE_TIME || '';
       }
     }
 
@@ -329,6 +331,7 @@ class WoWSAnalyzer {
         survivalRate: s.battles > 0 ? (s.survived / s.battles * 100) : 0,
         mainAccuracy: s.shotsMain > 0 ? (s.hitsMain / s.shotsMain * 100) : 0,
         torpAccuracy: s.shotsTorp > 0 ? (s.hitsTorp / s.shotsTorp * 100) : 0,
+        avgExp: s.battles > 0 ? Math.round(s.totalExp / s.battles) : 0,
         avgSpotDmg: s.battles > 0 ? Math.round(s.scoutingDamage / s.battles) : 0,
         avgPotentialDmg: s.battles > 0 ? Math.round(s.potentialDamage / s.battles) : 0,
         avgShipsSpotted: s.battles > 0 ? (s.shipsSpotted / s.battles) : 0,
