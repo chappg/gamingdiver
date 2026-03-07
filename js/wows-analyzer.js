@@ -448,8 +448,15 @@ class WoWSAnalyzer {
     if (tenrByType.length) console.log('[GamingDiver] DEBUG Tenryu in By_Type:', tenrByType);
     if (!tenrExport.length && !tenrByType.length) console.warn('[GamingDiver] DEBUG Tenryu NOT FOUND in any table');
 
-    // 5. List ALL CSV table names in the export
+    // 5. List ALL CSV table names in the export + dump small tables
     console.log('[GamingDiver] DEBUG All tables in export:', Object.keys(this.data));
+    for (const [table, rows] of Object.entries(this.data)) {
+      if (rows.length <= 5) {
+        console.log('[GamingDiver] DEBUG Table', table, '(' + rows.length + ' rows):', rows);
+      } else {
+        console.log('[GamingDiver] DEBUG Table', table, '(' + rows.length + ' rows), columns:', Object.keys(rows[0]));
+      }
+    }
 
     // Add any user ships not in VEHICLE_MAP and not already merged
     const unmatchedExport = [];
