@@ -457,11 +457,11 @@ class WoWSAnalyzer {
     if (tenrByType.length) console.log('[GamingDiver] DEBUG Tenryu in By_Type:', tenrByType);
     if (!tenrExport.length && !tenrByType.length) console.warn('[GamingDiver] DEBUG Tenryu NOT FOUND in any table');
 
-    // Debug: USA BBs with battle counts to find Wyoming
+    // Debug: USSR DDs with battle counts to find Boevoi
     for (const row of shipStats) {
-      if (/^PASB/.test(row.VEHICLE_NAME)) {
+      if (/^PRSD/.test(row.VEHICLE_NAME)) {
         const vm = typeof VEHICLE_MAP !== 'undefined' ? VEHICLE_MAP[row.VEHICLE_NAME] : null;
-        console.log('[GamingDiver] DEBUG USA BB:', row.VEHICLE_NAME, '→', vm?.name || '?', '| battles:', row.BATTLES_COUNT, 'inGarage:', row.IN_GARAGE);
+        console.log('[GamingDiver] DEBUG USSR DD:', row.VEHICLE_NAME, '→', vm?.name || '?', '| battles:', row.BATTLES_COUNT, 'inGarage:', row.IN_GARAGE);
       }
     }
 
