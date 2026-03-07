@@ -1,14 +1,12 @@
 // Dashboard rendering — builds all charts and tables from analyzer results
 
-// Ship class SVG icons (white, 16x16) — WoWS Legends style
-// All share same outer shape: right-pointing arrowhead with vertical left edge
-// DD=solid, CA=1 vertical line, BB=2 vertical lines, CV=2 horizontal lines
+// Ship class SVG icons — sourced from wowsbuilds.com class markers
 const CLASS_SVG = {
-  'Destroyer': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="1,1 15,8 1,15"/></svg>',
-  'Cruiser': '<svg class="class-icon" viewBox="0 0 16 16"><polygon points="1,1 15,8 1,15" fill="white"/><line x1="6" y1="3.4" x2="6" y2="12.6" stroke="#0a1929" stroke-width="1.8"/></svg>',
-  'Battleship': '<svg class="class-icon" viewBox="0 0 16 16"><polygon points="1,1 15,8 1,15" fill="white"/><line x1="5" y1="2.7" x2="5" y2="13.3" stroke="#0a1929" stroke-width="1.8"/><line x1="9" y1="4.8" x2="9" y2="11.2" stroke="#0a1929" stroke-width="1.8"/></svg>',
-  'Carrier': '<svg class="class-icon" viewBox="0 0 16 16"><polygon points="1,1 15,8 1,15" fill="white"/><line x1="2" y1="5.5" x2="12" y2="5.5" stroke="#0a1929" stroke-width="1.8"/><line x1="2" y1="10.5" x2="12" y2="10.5" stroke="#0a1929" stroke-width="1.8"/></svg>',
-  'Aircraft Carrier': '<svg class="class-icon" viewBox="0 0 16 16"><polygon points="1,1 15,8 1,15" fill="white"/><line x1="2" y1="5.5" x2="12" y2="5.5" stroke="#0a1929" stroke-width="1.8"/><line x1="2" y1="10.5" x2="12" y2="10.5" stroke="#0a1929" stroke-width="1.8"/></svg>',
+  'Destroyer': '<svg class="class-icon" viewBox="0 0 167 80" fill="white"><path d="M159 40L2.5 77V3L159 40Z"/></svg>',
+  'Cruiser': '<svg class="class-icon" viewBox="0 0 170 80" fill="white"><path d="M123.5 77.5H65.4L106.5 2.5H123.5L166.2 40L123.5 77.5ZM2.5 77.5V2.5H83.7L42.6 77.5H2.5Z"/></svg>',
+  'Battleship': '<svg class="class-icon" viewBox="0 0 170 80" fill="white"><path d="M123.5 77.5H83.4L124.2 3L166.2 40L123.5 77.5ZM38.4 77.5L79.5 2.5H101.7L60.6 77.5H38.4ZM2.5 77.5V2.5H56.7L15.6 77.5H2.5Z"/></svg>',
+  'Carrier': '<svg class="class-icon" viewBox="0 0 170 80" fill="white"><path d="M123 77.5H97.5V2.5H123L166.2 40L123 77.5Z"/><rect x="0" y="0" width="82" height="33" rx="1"/><rect x="0" y="47" width="82" height="33" rx="1"/></svg>',
+  'Aircraft Carrier': '<svg class="class-icon" viewBox="0 0 170 80" fill="white"><path d="M123 77.5H97.5V2.5H123L166.2 40L123 77.5Z"/><rect x="0" y="0" width="82" height="33" rx="1"/><rect x="0" y="47" width="82" height="33" rx="1"/></svg>',
 };
 function classIcon(cls) { return CLASS_SVG[cls] || ''; }
 
