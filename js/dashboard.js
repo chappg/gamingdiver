@@ -214,6 +214,22 @@ class Dashboard {
       }
     }
 
+    // Account resources (merge into overview cards)
+    const res = c.resources;
+    let premiumCard = '', distanceCard = '';
+    if (res) {
+      if (res.premiumExpiry) {
+        const pDate = new Date(res.premiumExpiry);
+        if (!isNaN(pDate)) {
+          const premiumLabel = pDate > new Date()
+            ? `${String(pDate.getMonth() + 1).padStart(2, '0')}/${pDate.getFullYear()}`
+            : 'Expired';
+          premiumCard = this.statCard(premiumLabel, 'Premium Until', premiumLabel === 'Expired' ? '' : 'Active');
+        }
+      }
+      distanceCard = this.statCard(fmt(res.distance) + ' nm', 'Distance Sailed', '');
+    }
+
     cards.innerHTML = [
       this.statCard(fmt(ms.battles), plural(ms.battles, 'Battle'), mode === 'all' ? `${c.totalSessions} sessions` : ''),
       this.statCard(wpct(ms.winRate, ms.battles), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
@@ -225,27 +241,13 @@ class Dashboard {
       this.statCard(pct(ms.torpAccuracy), 'Torp Acc.', ''),
       playingSinceCard,
       clanSinceCard,
+      premiumCard,
+      distanceCard,
     ].join('');
 
-    // Account resources
-    const res = c.resources;
+    // Hide empty resource row
     const resourceCards = document.getElementById('resourceCards');
-    if (resourceCards && res) {
-      const usedSlots = res.shipSlots - res.emptySlots;
-      let premiumLabel = '';
-      if (res.premiumExpiry) {
-        const pDate = new Date(res.premiumExpiry);
-        if (!isNaN(pDate)) {
-          premiumLabel = pDate > new Date()
-            ? `${String(pDate.getMonth() + 1).padStart(2, '0')}/${pDate.getFullYear()}`
-            : 'Expired';
-        }
-      }
-      resourceCards.innerHTML = [
-        premiumLabel ? this.statCard(premiumLabel, 'Premium Until', premiumLabel === 'Expired' ? '' : 'Active') : '',
-        this.statCard(fmt(res.distance) + ' nm', 'Distance Sailed', ''),
-      ].join('');
-    }
+    if (resourceCards) resourceCards.style.display = 'none';
 
     this.renderTopShips('battles');
     this.setupTopShipsToggle();
