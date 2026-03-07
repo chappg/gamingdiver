@@ -159,7 +159,7 @@ class Dashboard {
     if (acct.activatedAt) {
       const d = new Date(acct.activatedAt);
       if (!isNaN(d)) {
-        const monthYear = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const monthYear = `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         const years = ((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000)).toFixed(1);
         playingSinceCard = this.statCard(monthYear, 'Playing Since', `${years} years`);
       }
