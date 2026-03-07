@@ -1320,7 +1320,7 @@ class Dashboard {
         <div class="sc-name"><span class="tier-badge">${s.tier}</span>${s.name}</div>
         <div class="sc-meta">${flagIcon(s.nation)} ${s.nation} • ${s.class} ${s.premium ? '• Premium' : ''}</div>
         <div class="sc-stats">
-          <span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> ${plural(s.battles, 'battle')}</span>
+          ${s.battles > 0 ? `<span class="sc-stat"><span class="sc-stat-val">${s.battles}</span> ${plural(s.battles, 'battle')}</span>` : ''}
           ${statusLabel}
         </div>
         ${costLine}
