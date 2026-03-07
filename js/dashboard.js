@@ -1,12 +1,12 @@
 // Dashboard rendering — builds all charts and tables from analyzer results
 
-// Ship class SVG icons (white, 16x16) — WoWS style markers
+// Ship class SVG icons (white, 16x16) — WoWS Legends style right-pointing markers
 const CLASS_SVG = {
-  'Destroyer': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="8,2 14,14 2,14"/></svg>',
-  'Cruiser': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><rect x="3" y="8" width="10" height="6"/><polygon points="8,2 13,8 3,8"/></svg>',
-  'Battleship': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><rect x="2" y="8" width="12" height="7"/><polygon points="8,1 14,8 2,8"/></svg>',
-  'Carrier': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><rect x="2" y="8" width="12" height="7"/><polygon points="8,1 14,8 2,8"/><line x1="2" y1="4" x2="14" y2="4" stroke="white" stroke-width="2"/></svg>',
-  'Aircraft Carrier': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><rect x="2" y="8" width="12" height="7"/><polygon points="8,1 14,8 2,8"/><line x1="2" y1="4" x2="14" y2="4" stroke="white" stroke-width="2"/></svg>',
+  'Destroyer': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="2,2 14,8 2,14"/></svg>',
+  'Cruiser': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="2,2 14,8 2,14"/><line x1="4" y1="8" x2="13" y2="8" stroke="#0a1929" stroke-width="1.5"/></svg>',
+  'Battleship': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="2,2 14,8 2,14"/><line x1="4" y1="6.5" x2="12" y2="6.5" stroke="#0a1929" stroke-width="1.5"/><line x1="4" y1="9.5" x2="12" y2="9.5" stroke="#0a1929" stroke-width="1.5"/></svg>',
+  'Carrier': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="2,2 12,8 2,14"/><polygon points="10,5 16,8 10,11"/></svg>',
+  'Aircraft Carrier': '<svg class="class-icon" viewBox="0 0 16 16" fill="white"><polygon points="2,2 12,8 2,14"/><polygon points="10,5 16,8 10,11"/></svg>',
 };
 function classIcon(cls) { return CLASS_SVG[cls] || ''; }
 
