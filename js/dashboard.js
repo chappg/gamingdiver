@@ -449,6 +449,43 @@ class Dashboard {
         valFn = s => s.battles.toLocaleString(); label = 'Battles'; break;
     }
 
+    // Render summary stats for filtered ships
+    const summaryEl = document.getElementById('topShipsSummary');
+    if (summaryEl) {
+      if (eligible.length === 0) {
+        summaryEl.innerHTML = '';
+      } else {
+        let totBattles = 0, totWins = 0, totDamage = 0, totFrags = 0, totSurvived = 0;
+        for (const s of eligible) {
+          totBattles += s.battles; totWins += s.wins || 0; totDamage += s.damage || (s.avgDamage * s.battles) || 0;
+          totFrags += s.frags || 0; totSurvived += s.survived || 0;
+        }
+        const totDeaths = totBattles - totSurvived;
+        const sumWr = totBattles > 0 ? (totWins / totBattles * 100).toFixed(1) + '%' : '—';
+        const sumAvgDmg = totBattles > 0 ? fmt(Math.round(totDamage / totBattles)) : '—';
+        const sumKd = totDeaths > 0 ? (totFrags / totDeaths).toFixed(2) : totFrags > 0 ? totFrags.toFixed(0) : '—';
+        const sumSurv = totBattles > 0 ? (totSurvived / totBattles * 100).toFixed(1) + '%' : '—';
+
+        // Build filter description
+        const parts = [];
+        if (filterNation) parts.push(filterNation);
+        if (filterType === 'tech') parts.push('Tech Tree');
+        else if (filterType === 'premium') parts.push('Premium');
+        if (filterTier) parts.push('Tier ' + filterTier);
+        const filterLabel = parts.length ? parts.join(' · ') : 'All Ships';
+
+        summaryEl.innerHTML = `
+          <div class="summary-label">${filterLabel} — ${eligible.length} ${plural(eligible.length, 'ship')}</div>
+          <div class="summary-stats">
+            <div class="summary-stat"><span class="ss-val">${totBattles.toLocaleString()}</span><span class="ss-label">Games</span></div>
+            <div class="summary-stat"><span class="ss-val">${sumWr}</span><span class="ss-label">Win Rate</span></div>
+            <div class="summary-stat"><span class="ss-val">${sumAvgDmg}</span><span class="ss-label">Avg Damage</span></div>
+            <div class="summary-stat"><span class="ss-val">${sumKd}</span><span class="ss-label">K/D</span></div>
+            <div class="summary-stat"><span class="ss-val">${sumSurv}</span><span class="ss-label">Survival</span></div>
+          </div>`;
+      }
+    }
+
     const isBottom = ['lowestWinRate', 'lowestDamage', 'leastBattles'].includes(metric);
     const top10 = sorted.slice(0, 10);
     const grid = document.getElementById('topShipsGrid');

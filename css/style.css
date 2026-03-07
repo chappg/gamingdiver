@@ -212,6 +212,20 @@ body {
 }
 .toggle-btn:hover { border-color: var(--accent-dim); color: var(--text); }
 .toggle-btn.active { background: rgba(0,229,255,0.12); border-color: var(--accent); color: var(--accent); }
+.top-ships-summary {
+  margin-bottom: 12px; padding: 10px 14px; background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.15); border-radius: 8px;
+}
+.summary-label {
+  font-size: 0.85em; color: var(--text-dim); margin-bottom: 6px; font-weight: 500;
+}
+.summary-stats {
+  display: flex; gap: 20px; flex-wrap: wrap;
+}
+.summary-stat {
+  display: flex; flex-direction: column; align-items: center; min-width: 70px;
+}
+.ss-val { font-size: 1.1em; font-weight: 700; color: var(--accent); }
+.ss-label { font-size: 0.72em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
 .top-ships-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;
 }
