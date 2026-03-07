@@ -153,6 +153,18 @@ class Dashboard {
     if (!ms) return;
 
     const cards = document.getElementById('overviewCards');
+    // "Playing since" from account activation date
+    const acct = this.r.account || {};
+    let playingSinceCard = '';
+    if (acct.activatedAt) {
+      const d = new Date(acct.activatedAt);
+      if (!isNaN(d)) {
+        const monthYear = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const years = ((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000)).toFixed(1);
+        playingSinceCard = this.statCard(monthYear, 'Playing Since', `${years} years`);
+      }
+    }
+
     cards.innerHTML = [
       this.statCard(fmt(ms.battles), 'Battles', mode === 'all' ? `${c.totalSessions} sessions` : ''),
       this.statCard(wpct(ms.winRate, ms.battles), 'Win Rate', `${fmt(ms.wins)} wins`, ms.winRate >= 50 ? 'good' : 'bad'),
@@ -162,6 +174,7 @@ class Dashboard {
       this.statCard(`${fmt(c.totalPlayTimeHours)}h`, 'Play Time', `~${c.avgSessionMin}m avg`),
       this.statCard(pct(ms.mainAccuracy), 'Main Acc.', ''),
       this.statCard(pct(ms.torpAccuracy), 'Torp Acc.', ''),
+      playingSinceCard,
     ].join('');
 
     this.renderTopShips('battles');

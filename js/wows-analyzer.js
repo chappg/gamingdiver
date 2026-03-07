@@ -72,6 +72,7 @@ class WoWSAnalyzer {
 
   analyze() {
     const r = {};
+    r.account = this.analyzeAccount();
     r.career = this.analyzeCareer();
     r.ships = this.analyzeShips();
     r.trends = this.analyzeTrends();
@@ -79,6 +80,14 @@ class WoWSAnalyzer {
     r.records = this.analyzeRecords();
     this.results = r;
     return r;
+  }
+
+  analyzeAccount() {
+    const info = this.data['WOWSL_Account_Info'] || this.data['Account_Info'] || [];
+    const row = info[0] || {};
+    // Try common column name variants
+    const activated = row.ACTIVATED_AT || row.Activated_At || row.activated_at || '';
+    return { activatedAt: activated };
   }
 
   analyzeCareer() {
