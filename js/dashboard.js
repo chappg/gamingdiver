@@ -76,6 +76,24 @@ class Dashboard {
   }
 
   render() {
+    // Reset all filter UI to defaults on new upload
+    document.querySelectorAll('.filter-btn.active, .nation-btn.active, .nation-icon.active').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.filter-btn[data-tier=""], .filter-btn[data-class=""], .filter-btn[data-type=""], .filter-btn[data-nation=""], .filter-btn[data-metric="battles"]').forEach(el => el.classList.add('active'));
+    const ownedCb = document.getElementById('collFilterOwned');
+    if (ownedCb) ownedCb.checked = false;
+    const rentalCb = document.getElementById('collShowRentals');
+    if (rentalCb) rentalCb.checked = false;
+    const minInput = document.getElementById('filterMinBattles');
+    if (minInput) minInput.value = '1';
+
+    // Reset tab to Overview
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    const firstTab = document.querySelector('.tab');
+    const firstContent = document.querySelector('.tab-content');
+    if (firstTab) firstTab.classList.add('active');
+    if (firstContent) firstContent.classList.add('active');
+
     try { this.renderOverview(); } catch(e) { console.error('renderOverview:', e); }
     try { this.renderShips(); } catch(e) { console.error('renderShips:', e); }
     try { this.renderTrends(); } catch(e) { console.error('renderTrends:', e); }
