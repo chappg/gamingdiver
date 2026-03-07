@@ -242,13 +242,8 @@ class Dashboard {
         }
       }
       resourceCards.innerHTML = [
-        this.statCard(fmt(res.doubloons), '💰 Doubloons', ''),
-        this.statCard(fmt(res.credits), '🪙 Silver', ''),
-        this.statCard(fmt(res.freeXP), 'Global XP', ''),
-        this.statCard(fmt(res.eliteXP), 'Elite XP', ''),
-        premiumLabel ? this.statCard(premiumLabel, 'Premium', premiumLabel === 'Expired' ? '' : 'Active') : '',
+        premiumLabel ? this.statCard(premiumLabel, 'Premium Until', premiumLabel === 'Expired' ? '' : 'Active') : '',
         this.statCard(fmt(res.distance) + ' nm', 'Distance Sailed', ''),
-        this.statCard(`${usedSlots}/${res.shipSlots}`, 'Ship Slots', `${res.emptySlots} empty`),
       ].join('');
     }
 
