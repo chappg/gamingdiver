@@ -457,6 +457,14 @@ class WoWSAnalyzer {
     if (tenrByType.length) console.log('[GamingDiver] DEBUG Tenryu in By_Type:', tenrByType);
     if (!tenrExport.length && !tenrByType.length) console.warn('[GamingDiver] DEBUG Tenryu NOT FOUND in any table');
 
+    // Debug: USA BBs with battle counts to find Wyoming
+    for (const row of shipStats) {
+      if (/^PASB/.test(row.VEHICLE_NAME)) {
+        const vm = typeof VEHICLE_MAP !== 'undefined' ? VEHICLE_MAP[row.VEHICLE_NAME] : null;
+        console.log('[GamingDiver] DEBUG USA BB:', row.VEHICLE_NAME, '→', vm?.name || '?', '| battles:', row.BATTLES_COUNT, 'inGarage:', row.IN_GARAGE);
+      }
+    }
+
     // 5. List ALL CSV table names in the export + dump small tables
     console.log('[GamingDiver] DEBUG All tables in export:', Object.keys(this.data));
     for (const [table, rows] of Object.entries(this.data)) {
