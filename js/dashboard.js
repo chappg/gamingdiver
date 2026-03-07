@@ -1313,7 +1313,7 @@ class Dashboard {
         statusLabel = '<span class="sc-stat" style="color:var(--accent)">↩ Sold</span>';
         if (s.repurchaseCost != null) costLine = `<div class="sc-recovery">🪙 ${fmt(s.repurchaseCost)} to repurchase</div>`;
       } else {
-        statusLabel = '<span class="sc-stat" style="color:var(--text-dim)">Not owned</span>';
+        statusLabel = '<span class="sc-stat" style="color:var(--text-dim)">Never sailed</span>';
       }
       return `
       <div class="ship-card ${statusClass}">
