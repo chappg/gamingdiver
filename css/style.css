@@ -180,10 +180,13 @@ body {
 .top-filter-row {
   display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
 }
+.top-filter-row-single {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px;
+}
 .top-filter-inline {
   display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
 }
-.type-buttons { display: flex; gap: 4px; margin-left: auto; }
+.type-buttons { display: flex; gap: 4px; }
 .class-buttons { display: flex; gap: 4px; }
 .ship-filter-row, .coll-filter-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .nation-icons { display: flex; gap: 4px; flex-wrap: wrap; }
