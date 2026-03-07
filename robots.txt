@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
 Sitemap: https://gamingdiver.com/sitemap.xml
+
+# LLM-friendly site description
+# See https://llmstxt.org
+# https://gamingdiver.com/llms.txt

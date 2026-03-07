@@ -1,0 +1,36 @@
+# GamingDiver
+
+> Upload your World of Warships Legends data export and get rich visual insights. Privacy-first — your game data never leaves your browser.
+
+GamingDiver is a free, client-side web app that analyzes WoWS Legends data exports. Players request their data from Wargaming, upload the ZIP file, and instantly see detailed stats, charts, and insights.
+
+## Features
+
+- **Career Overview**: Win rate, K/D ratio, average damage, survival rate, accuracy, play time, account resources (doubloons, silver, Global XP)
+- **Ship Stats**: Sortable table of all ships with battles, win rate, damage, K/D, spotting damage, potential damage (tanking), accuracy, XP, and last played date
+- **Top Ships**: Filterable leaderboard by nation, tier, and type — sort by most played, win rate, damage, K/D, spotting, tanking, caps, and more
+- **Port (Collection)**: Complete ship collection tracker with owned/not-owned/sold status, completion percentages by nation, sort by name/tier/battles/XP
+- **Trends**: Performance trends over time via snapshots, monthly activity chart, play time heatmap, session duration analysis
+- **Sold Ship Recovery**: Identifies sold premium ships (with recovery ticket costs) and sold tech tree ships (with repurchase prices)
+- **Clan Display**: Shows clan tag and membership date
+
+## How It Works
+
+1. Request your data export from Wargaming (wowslegends.com → Account Management → Data Export)
+2. Upload the ZIP file to gamingdiver.com
+3. All analysis happens in your browser — no data is sent to any server
+
+## Technical Details
+
+- 100% client-side (vanilla HTML, CSS, JavaScript)
+- No server, no database, no accounts required
+- Uses IndexedDB for optional snapshot storage (trend tracking across uploads)
+- Hosted on GitHub Pages with Cloudflare CDN
+- Supports all WoWS Legends platforms (Xbox, PlayStation)
+
+## Links
+
+- Website: https://gamingdiver.com
+- Export Guide: https://gamingdiver.com/export-guide.html
+- Privacy Policy: https://gamingdiver.com/privacy.html
+- Feedback: https://github.com/chappg/gamingdiver/issues
