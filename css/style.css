@@ -129,7 +129,12 @@ body {
 .btn-danger:hover { background: rgba(239,83,80,0.25); }
 
 /* Tabs */
-.tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; overflow-x: auto; }
+.tabs { display: flex; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; overflow-x: auto; }
+.tabs-left { display: flex; gap: 4px; }
+.currency-bar { display: flex; gap: 14px; margin-left: auto; align-items: center; font-size: 0.85em; padding-bottom: 8px; white-space: nowrap; }
+.currency-bar .cur { display: flex; align-items: center; gap: 4px; }
+.currency-bar .cur-val { font-weight: 600; }
+.currency-bar .cur-icon { width: 18px; height: 18px; display: inline-block; vertical-align: middle; }
 .tab {
   padding: 10px 20px; background: none; border: none; color: var(--text-dim);
   cursor: pointer; font-size: 0.95em; font-weight: 500;

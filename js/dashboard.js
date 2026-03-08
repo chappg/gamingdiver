@@ -249,6 +249,31 @@ class Dashboard {
     const resourceCards = document.getElementById('resourceCards');
     if (resourceCards) resourceCards.style.display = 'none';
 
+    // Currency bar (in-game style, next to tabs)
+    const curBar = document.getElementById('currencyBar');
+    if (curBar && res) {
+      const fmtK = v => v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : v >= 1e3 ? (v / 1e3).toFixed(1) + ' K' : fmt(v);
+      const doubloonIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="gold" stroke-width="1.5"/><path d="M10 4.5v11M7 8.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.5-1.3 2-3 2.5-3 1.5-3 2.5 1.3 2.5 3 2.5 3-1 3-2.5" fill="none" stroke="gold" stroke-width="1.2" stroke-linecap="round"/></svg>';
+      const silverIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="gold" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="gold" stroke-width="1"/></svg>';
+      const globalXPIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><polygon points="10,2 12.5,7.5 18,8 14,12 15,18 10,15 5,18 6,12 2,8 7.5,7.5" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+      const eliteXPIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><path d="M10 3L6 10h8L10 3z" fill="none" stroke="silver" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 10L6 17h8L10 10z" fill="none" stroke="silver" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+      const premIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><path d="M4 16 Q2 10 4 5 Q6 2 8 1.5" fill="none" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/><path d="M16 16 Q18 10 16 5 Q14 2 12 1.5" fill="none" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" fill="none" stroke="#4caf50" stroke-width="1.2"/></svg>';
+      let premDays = '';
+      if (res.premiumExpiry) {
+        const pDate = new Date(res.premiumExpiry);
+        if (!isNaN(pDate) && pDate > new Date()) {
+          premDays = Math.ceil((pDate - new Date()) / (24 * 3600 * 1000)) + ' DAYS';
+        }
+      }
+      curBar.innerHTML = [
+        `<span class="cur"><span class="cur-val" style="color:gold">${fmtK(res.doubloons)}</span>${doubloonIcon}</span>`,
+        `<span class="cur"><span class="cur-val" style="color:gold">${fmtK(res.credits)}</span>${silverIcon}</span>`,
+        `<span class="cur"><span class="cur-val" style="color:#00e5ff">${fmtK(res.freeXP)}</span>${globalXPIcon}</span>`,
+        `<span class="cur"><span class="cur-val" style="color:silver">${fmtK(res.eliteXP)}</span>${eliteXPIcon}</span>`,
+        premDays ? `<span class="cur"><span class="cur-val" style="color:#4caf50">${premDays}</span>${premIcon}</span>` : '',
+      ].filter(Boolean).join('');
+    }
+
     this.renderTopShips('battles');
     this.setupTopShipsToggle();
     this.renderRecords();
