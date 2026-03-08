@@ -250,14 +250,20 @@ class Dashboard {
     if (resourceCards) resourceCards.style.display = 'none';
 
     // Currency bar (in-game style, next to tabs)
+    // Currency bar (in-game style icons)
     const curBar = document.getElementById('currencyBar');
     if (curBar && res) {
-      const fmtK = v => v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : v >= 1e3 ? (v / 1e3).toFixed(1) + ' K' : fmt(v);
-      const doubloonIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="gold" stroke-width="1.5"/><path d="M10 4.5v11M7 8.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.5-1.3 2-3 2.5-3 1.5-3 2.5 1.3 2.5 3 2.5 3-1 3-2.5" fill="none" stroke="gold" stroke-width="1.2" stroke-linecap="round"/></svg>';
-      const silverIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="gold" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="gold" stroke-width="1"/></svg>';
-      const globalXPIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><polygon points="10,2 12.5,7.5 18,8 14,12 15,18 10,15 5,18 6,12 2,8 7.5,7.5" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linejoin="round"/></svg>';
-      const eliteXPIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><path d="M10 3L6 10h8L10 3z" fill="none" stroke="silver" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 10L6 17h8L10 10z" fill="none" stroke="silver" stroke-width="1.5" stroke-linejoin="round"/></svg>';
-      const premIcon = '<svg class="cur-icon" viewBox="0 0 20 20"><path d="M4 16 Q2 10 4 5 Q6 2 8 1.5" fill="none" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/><path d="M16 16 Q18 10 16 5 Q14 2 12 1.5" fill="none" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" fill="none" stroke="#4caf50" stroke-width="1.2"/></svg>';
+      const fmtCur = v => v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : v >= 1e3 && v >= 10000 ? (v / 1e3).toFixed(1) + ' K' : fmt(v);
+      // Doubloons: gold coin with anchor inside
+      const doubloonIcon = '<svg class="cur-icon" viewBox="0 0 20 20" fill="none" stroke="#D4C84A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><circle cx="10" cy="5" r="1.5"/><line x1="10" y1="6.5" x2="10" y2="15"/><line x1="7" y1="9" x2="13" y2="9"/><path d="M6.5 14 Q7 12 10 12 Q13 12 13.5 14" /><line x1="6.5" y1="14" x2="5.5" y2="13"/><line x1="13.5" y1="14" x2="14.5" y2="13"/></svg>';
+      // Silver: gold coin with globe (circle + meridians)
+      const silverIcon = '<svg class="cur-icon" viewBox="0 0 20 20" fill="none" stroke="#D4C84A" stroke-width="1.3"><circle cx="10" cy="10" r="8.5"/><circle cx="10" cy="10" r="5"/><ellipse cx="10" cy="10" rx="2.5" ry="5"/><line x1="5" y1="10" x2="15" y2="10"/></svg>';
+      // Global XP: teal/green star outline
+      const globalXPIcon = '<svg class="cur-icon" viewBox="0 0 20 20" fill="none" stroke="#3EDBB5" stroke-width="1.4" stroke-linejoin="round"><polygon points="10,1.5 12.4,7.2 18.5,7.8 13.8,12 15.3,18 10,14.8 4.7,18 6.2,12 1.5,7.8 7.6,7.2"/></svg>';
+      // Elite XP: silver double chevron pointing down
+      const eliteXPIcon = '<svg class="cur-icon" viewBox="0 0 20 20" fill="none" stroke="#C8D8E8" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><polyline points="5,3 10,9 15,3"/><polyline points="5,10 10,16 15,10"/></svg>';
+      // Premium: green laurel wreath with star
+      const premIcon = '<svg class="cur-icon" viewBox="0 0 20 20" fill="none" stroke="#3EDBB5" stroke-width="1.2" stroke-linecap="round"><path d="M5 17 Q2 12 3 7 Q4.5 3 7 1.5"/><path d="M15 17 Q18 12 17 7 Q15.5 3 13 1.5"/><path d="M4 15 Q3 11 4 8"/><path d="M16 15 Q17 11 16 8"/><polygon points="10,5 11.2,8 14,8.5 12,10.5 12.5,13.5 10,12 7.5,13.5 8,10.5 6,8.5 8.8,8" fill="#3EDBB5" stroke="none"/></svg>';
       let premDays = '';
       if (res.premiumExpiry) {
         const pDate = new Date(res.premiumExpiry);
@@ -266,11 +272,11 @@ class Dashboard {
         }
       }
       curBar.innerHTML = [
-        `<span class="cur"><span class="cur-val" style="color:gold">${fmtK(res.doubloons)}</span>${doubloonIcon}</span>`,
-        `<span class="cur"><span class="cur-val" style="color:gold">${fmtK(res.credits)}</span>${silverIcon}</span>`,
-        `<span class="cur"><span class="cur-val" style="color:#00e5ff">${fmtK(res.freeXP)}</span>${globalXPIcon}</span>`,
-        `<span class="cur"><span class="cur-val" style="color:silver">${fmtK(res.eliteXP)}</span>${eliteXPIcon}</span>`,
-        premDays ? `<span class="cur"><span class="cur-val" style="color:#4caf50">${premDays}</span>${premIcon}</span>` : '',
+        `<span class="cur">${doubloonIcon}<span class="cur-val" style="color:#D4C84A">${fmtCur(res.doubloons)}</span></span>`,
+        `<span class="cur">${silverIcon}<span class="cur-val" style="color:#e0e0e0">${fmtCur(res.credits)}</span></span>`,
+        `<span class="cur">${globalXPIcon}<span class="cur-val" style="color:#3EDBB5">${fmtCur(res.freeXP)}</span></span>`,
+        `<span class="cur">${eliteXPIcon}<span class="cur-val" style="color:#C8D8E8">${fmtCur(res.eliteXP)}</span></span>`,
+        premDays ? `<span class="cur">${premIcon}<span class="cur-val" style="color:#D4C84A">${premDays}</span></span>` : '',
       ].filter(Boolean).join('');
     }
 
