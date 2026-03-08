@@ -1271,6 +1271,10 @@ class Dashboard {
     if (type === 'tech') ships = ships.filter(s => !s.premium);
     if (type === 'premium') ships = ships.filter(s => s.premium);
     if (type === 'sold') ships = ships.filter(s => s.sold);
+    // Compute completion stats before applying owned filter
+    const ownedCount = ships.filter(s => s.inGarage).length;
+    const totalCount = ships.length;
+
     if (ownedOnly) ships = ships.filter(s => s.inGarage);
 
     // Sort
@@ -1279,10 +1283,6 @@ class Dashboard {
     else if (sortKey === 'battles') ships.sort((a, b) => b.battles - a.battles || a.name.localeCompare(b.name));
     else if (sortKey === 'exp') ships.sort((a, b) => (b.exp || 0) - (a.exp || 0) || a.name.localeCompare(b.name));
     else ships.sort((a, b) => a.name.localeCompare(b.name));
-
-    // Show filtered completion summary
-    const ownedCount = ships.filter(s => s.inGarage).length;
-    const totalCount = ships.length;
     const filtPct = totalCount > 0 ? Math.round(ownedCount / totalCount * 100) : 0;
     let filterSummary = document.getElementById('collFilterSummary');
     if (!filterSummary) {
